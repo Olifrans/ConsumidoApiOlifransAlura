@@ -149,3 +149,6 @@ Quando estivermos usando a API dentro da aplicação web poderemos remover as de
 [20:31] Então eu espero vocês, ansiosamente, no próximo vídeo.
 
 
+SocketException: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente 127.0.0.1:80
+
+

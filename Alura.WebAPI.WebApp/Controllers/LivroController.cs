@@ -3,10 +3,11 @@ using Alura.ListaLeitura.Persistencia;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using System.Net.Http;
 
 namespace Alura.ListaLeitura.WebApp.Controllers
 {
-    [Authorize]
+    //[Authorize]
     public class LivroController : Controller
     {
         private readonly IRepository<Livro> _repo;
@@ -48,9 +49,20 @@ namespace Alura.ListaLeitura.WebApp.Controllers
             return File("~/images/capas/capa-vazia.png", "image/png");
         }
 
+
+
+
         [HttpGet]
         public IActionResult Detalhes(int id)
         {
+            //Classe usada para encapsular reqisições http chama-se HttpClient
+
+            HttpClient httpClient = new HttpClient();
+
+            //https://localhost:44391/api/Livros/1
+            //https://localhost:44391/api/Livros/1
+
+
             var model = _repo.Find(id);
             if (model == null)
             {
@@ -58,6 +70,10 @@ namespace Alura.ListaLeitura.WebApp.Controllers
             }
             return View(model.ToModel());
         }
+
+
+
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
