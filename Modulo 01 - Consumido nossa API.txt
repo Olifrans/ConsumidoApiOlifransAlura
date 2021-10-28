@@ -1,0 +1,151 @@
+01 - Introdução
+
+[00:00] Galera, até agora nossas APIs não estão sendo consumidas por nenhuma aplicação. Então esse diagrama aqui tá meio errado, na verdade eu não tenho nada aqui consumindo a minha API. Estão lá sozinhas, vazias, querendo ajudar alguém, mas até agora ninguém tá consumindo essas APIs.
+
+[00:26] Outra coisa que nós temos também aqui no diagrama é o seguinte: algumas responsabilidades estão sendo duplicadas. A API de Livros é responsável pela persistência e pelas regras de negócio, mas a aplicação Web também é persistência e regras de negócio.
+
+[00:46] Então nós estamos com um código duplicado aqui. Se eu quiser fazer alguma manutenção, tiver algum bug nessa parte específica nesse módulo, eu terei problemas porque tem que mexer em dois lugares. Então eu vou tentar resolver esses dois problemas de uma vez só.
+
+[01:04] Qual é a minha ideia? A minha ideia é a seguinte: eu vou pegar isso aqui, já que ninguém está consumindo a minha API, eu vou fazer com que a própria aplicação Web consuma essa API. Então a aplicação Web será agora uma aplicação que vai emitir requisições para a API de Livros e API de Autenticação também.
+
+[01:29] Com isso, quando eu conseguir terminar e fazer tudo isso nessas próximas aulas, eu vou, inclusive, poder remover essa responsabilidade da minha aplicação Web. Então eu posso chegar aqui e fazer isso. Eu vou remover essas responsabilidades aqui. Minha aplicação Web vai ficar até um pouquinho menor. Posso até diminuir ela um pouquinho mais aqui.
+
+[02:04] Então percebam que até uma aplicação Web, não necessariamente no navegador, ela pode também se transformar em um cliente, porque ela vai consumir informações, vai fazer solicitações http pra outro servidor, que é o caso aqui das nossas APIs tanto de Livros quanto de Autenticação.
+
+[02:30] Então como é que eu faço uma requisição pra consumir a API de Livros, por exemplo? Aqui no Postman. Deixa eu apagar esses caras aqui, que eu estava fazendo uns testes aqui. Aqui no Potman como é que eu faço uma requisição? Eu tenho que saber qual é a URI do recurso, no caso da nossa API é http://localhost:6000/api/livros.
+
+[02:58] Também tenho que saber qual é o verbo http que eu vou utilizar pra emitir essa requisição. Depois que eu tiver essas duas informações eu vou emitir o comando, vou enviar, efetivamente, a requisição, e vou verificar justamente qual é a resposta.
+
+[03:17] E aí o Postman está me indicando que não pode obter nenhuma resposta, por quê? Porque o servidor aqui, o Daniel, esqueceu de subir a nossa API. Então agora eu estou com o meu servidor rodando aqui. Se eu tentar agora emitir a requisição novamente, eu vou obter alguma coisa.
+
+[03:36] A primeira coisa que aconteceu foi o seguinte: quando eu pego a resposta, a primeira coisa que eu tenho que fazer é verificar qual é o código de status http, no caso 401 significando que eu não tenho autorização para obter aquele recurso, pra conseguir pegar a resposta daquela requisição.
+
+[04:00] Isso porque a gente implementou segurança na nossa API colocando uma segurança baseada no JWT, uma segurança baseada em tokens. Lembram lá da parte 1 do nosso curso. Então pra eu botar um token aqui nessa requisição eu tenho que pegar o token.
+
+[04:23] Então eu já vou subir aqui o serviço de autorização, nossa API de segurança, e aqui no Postman eu vou fazer uma nova requisição. Qual é o verbo? Não sei se vocês vão lembrar: post. Vou colocar aqui a URI pra obter o recurso, está no http://localhost:5000/api/login. Além de mandar, antes de enviar eu também, nessa requisição aqui eu tenho que passar justamente os valores de login, no caso é admin, e a senha, que está aqui no password, que no caso é 123. Acho que agora vai funcionar.
+
+[05:15] Vou fazer um send aqui, emitir a requisição. Novamente vou olhar pra minha resposta. 200. Ok. Então primeiro http status code, 200, ok. Então agora eu posso, efetivamente, pegar a minha resposta e utilizá-la. No caso, eu vou pegar o token aqui e vou colocar dentro de um cabeçalho de autorização com o prefixo Bearer. Olha aqui, Bearer Token. E aqui em cima eu vou passar justamente o token.
+
+[05:53] Eu acho que agora eu consigo emitir a requisição. 200, ok, aqui o nosso status code. E eu consegui emitir e pegar os recursos que eu estava querendo inicialmente. Então é assim que eu estou consumindo a minha API e foi assim que a gente viu como fazer na parte 1 do curso.
+
+[06:14] Agora fica a pergunta: como que eu vou fazer pra minha aplicação Web consumir essa API? Ou seja, como é que eu vou emitir requisições através do C#?
+
+
+
+
+
+2 - Preparando o ambiente
+Atenção!
+O ambiente que você irá utilizar nesse curso é o mesmo da parte 1. Por isso, é obrigatório que você tenha concluído a parte inicial antes de começar por aqui, ok?
+
+
+
+
+
+
+03 - Download do Projeto Inicial
+Baixe o código-fonte inicial do projeto!
+
+Ele é o mesmo do que terminamos na primeira parte desse curso. Se você já fez esse curso, não precisa baixar novamente.
+
+
+
+
+
+04 - O problema que vamos resolver
+PRÓXIMA ATIVIDADE
+
+Como consumir nossa API dentro de uma aplicação AspNet Core?
+Como gerar uma requisição HTTP programaticamente?
+Quando aprendermos como resolver esse problema, estaremos aptos a consumir outras APIs também. Estaremos de fato aptos a iniciar qualquer requisição HTTP!
+
+Quando estivermos usando a API dentro da aplicação web poderemos remover as dependências relacionadas à persistência de livros, diminuindo o acoplamento entre a API e as aplicações que o consomem.
+
+
+
+
+05 - A classe HttpClient
+
+[00:00] Muito bem. Nesse vídeo então eu vou mostrar como fazer uma requisição desse tipo, que a gente está fazendo via Postman, lá no C#.
+
+[00:12] Então, apenas pra separar didaticamente aqui o curso, eu vou comentar. Então eu vou aqui nos meus controladores da API, tanto a de ListasLeitura quanto a de LivrosController, eu vou comentar a parte de autorização, porque isso vai ficar pra próxima aula. Então, pra separar didadicamente. Mas quando você for fazer isso em produção e tudo mais, você vai fazer de uma vez só.
+
+[00:47] Então eu comentei e preciso reiniciar aqui a minha API porque agora ela não está mais precisando daquele token de autenticação. Só pra separar didaticamente. Vamos lá então. Outra coisa que eu vou fazer aqui então é rodar a minha aplicação Web, Ctrl+F5 aqui, e ele vai pedir aqui um login, admin, senha superforte, 123, e agora eu tenho aqui a minha aplicação rodando.
+
+[01:19] A primeira requisição que eu vou querer alterar na aplicação Web. Então a aplicação Web agora vai começar a consumir nossa API, e a primeira aquisição que eu vou querer alterar é, justamente, essa requisição aqui, onde pega os detalhes de um livro. E esses detalhes de um livro está sendo atendido através dessa URL aqui. Voltando lá no começo, uma URL desse tipo aqui é uma URL típica de uma aplicação MVC, onde eu tenho primeiro o controlador, segundo a action, e terceiro o id, três segmentos aí.
+
+[02:01] Então eu vou agora aonde? Qual controlador e qual action que eu vou procurar no VisualStudio pra eu começar a modificar? Justamente no controlador LivroController, action chamada Detalhes. Vamos lá então. Deixa eu dar um zoom out aqui. Aqui no VisualStudio posso fechar esses caras aqui por enquanto. Fechar aqui também, ganhar mais espaço pra gente.
+
+[02:27] Então eu vou agora no controlador LivroController e vou procurar a action chamada Detalhes. Então essa é a action que eu vou começar a modificar pra, em vez de ela ir no repositório... Então, reparando aqui, eu estou usando o repositório, estou indo lá no banco de dados, diretamente, pra pegar o livro. E agora eu quero substituir isso pra usar a API pra pegar esse livro pra mim. Então é esse código que eu preciso modificar. Então eu vou dar um espaçozinho aqui, depois a gente vai melhorando esse código aqui.
+
+[03:02] Galera, a classe que eu uso pra encapsular requisições http é uma classe chamada HttpClient. Então vou escrever aqui HttpClient, não estou usando namespace onde essa classe está. Então eu vou apertar o Ctrl+Ponto e vou colocar isso lá no meu Using lá em cima da classe. Então eu vou chamar essa classe aqui de httpClient, aproveitar a sugestão desse cara aqui, e aqui dou um new. Criei um objeto desse tipo, httpClient.
+
+[03:44] Então lembrem-se lá do que eu preciso fazer, eu preciso saber qual é a URI que eu vou usar para pegar o recurso. No caso, eu quero pegar a URI, eu vou escrever ela aqui: http://localhost:6000/api/livros/{id}, e esse id ele está aqui como, pode ser como um template porque eu vou usar, justamente, a interpolação de string pra fazer isso.
+
+[04:19] Eu quero também mostrar pra vocês que eu vou fazer muito isso, eu vou usar bastante, pra poder pegar recursos lá na minha API, essa construção. Então, por exemplo, http://localhost:6000/api/listasleitura/paraler. Ou então pra eu pegar a capa de um livro, por exemplo, vou fazer assim http://localhost:6000/api/livros/{id}/capa.
+
+[04:52] Então gente, reparem que, pra emitir cada requisição dessa aqui, eu estou usando algumas coisas em comum: o domínio, a porta, e aqui um segmento que indica que eu estou usando a API. Então para essa classe httpClient, isso a gente pode reaproveitar pra qualquer requisição. Esse reaproveitamento vai ficar numa propriedade do httpClient chamada BaseAddress.
+
+[05:28] Então eu vou pegar isso aqui, esse BaseAdress é uma string. Na verdade, não é uma string, desculpem. É um objeto do tipo URI. Então aqui URI. E eu vou passar no construtor dele a string que é, justamente, o BaseAdress. Então, só pra poder mostrar pra vocês.
+
+[05:53] Então o que que muda pra cada requisição? Essa parte que vem depois do /api. No caso aqui eu quero fazer uma requisição com o verbo get. E a classe httpClient, eu vou colocar as referências que eu estou usando nessa aula aqui, vou colocar tudo como um exercício no final da aula, e vou colocar também um link pra vocês verem lá mais informações sobre essa classe httpClient.
+
+[06:23] E o comportamento dela pra emitir requisições é através de métodos, e cada método começa com o nome do verbo http. Então se eu quero emitir um get para essa URI aqui, eu vou procurar por um método que comece com get. Se eu quiser emitir um post, eu vou procurar um método que comece com post.
+
+[06:49] Então o que eu quero fazer aqui é emitir um get pra essa primeira URI ali. Então get. E aí eu tenho várias opções aqui pra fazer um get e eu vou usar a primeira que é esse método GetASync aqui. E, como argumento desse método, eu vou passar, justamente, o que falta na minha URI. Então o que está faltando é isso aqui, ele vai concatenar pra mim. Então deixa eu botar aqui como uma string, inclusive eu quero interpolar essa string pra pegar o ID que está vindo lá do meu argumento do meu action, via model binding.
+
+[07:42] Então aqui eu já estou apertando o botão de send de lá no Postman. Só que agora eu quero, além de mandar a requisição, eu quero pegar a resposta pra analisar. Então eu vou guardar isso numa variável que tem que ser do tipo httpResponseMessage, vou chamar essa variável de resposta.
+
+[08:07] Compilador está dando um erro. Que erro é esse? Vou botar o mouse aqui em cima pra gente ver o que que tá acontecendo. Não sei se vocês estão vendo aí, eu vou fazer um zoom mais pra cá. Não é possível converter implicitamente o tipo task para o tipo que eu coloquei lá que é httpResponseMessage. Estou lendo pra vocês aqui porque não está aparecendo tudo aí no vídeo.
+
+[08:36] Por que gente? Na verdade isso tem a ver com o nome deste método, esse método tem um nome que tem um ASync aqui no final. Não sei se você já fez o curso de paralelismo aqui na Alura onde esse assunto é discutido em mais detalhes. Mas o que está acontecendo aqui é que esse método é um método que é executado de forma assíncrona. Ou seja, se eu chamar esse método eu não vou ficar esperando ele terminar.
+
+[09:16] Então eu preciso indicar para o compilador que eu quero ficar esperando esse método ser executado e eu faço isso através de uma palavra reservada chamada await. Só que eu estou com outro erro aqui. É que pra poder dizer que eu vou esperar o método assíncrono ser executado eu tenho que marcar o container que está chamando esse método também com uma palavra reservada chamada Async.
+
+[09:54] Então agora eu realmente estou retornando uma resposta do tipo httResponseMessage. Tem mais coisa pra fazer, está dando um errinho aqui e aí eu vou mostrar isso pra vocês. Mas agora eu estou conseguindo fazer isso.
+
+[10:10] Inclusive, também vou deixar como referência pra vocês, é uma convenção de nomenclatura de métodos você colocar o sufixo Async em todos os métodos que serão executados de forma assíncrona.
+
+[10:31] Sempre quando vocês enxergarem esse tipo de método com o sufixo Async significa, muito provavelmente se a pessoa tiver usando as convenções da Microsoft, que esse método vai ser executado de forma assíncrona.
+
+[10:49] Então o que eu tenho que fazer agora? O que eu fiz lá no Postman? Eu precisei verificar o código de status. E esse tipo ResponseMessage já tem alguns métodos que me fazem verificar isso. Por exemplo, tem uma propriedade booleana que me diz true ou false se foi um statuscode de sucesso. Ou seja, ele estava dentro daquela família 200. Mas também tem um outro método, que eu vou usar por enquanto, que é chamado de EnsureSuccessStatusCode.
+
+[11:31] Então olha aqui, vou chamar esse método, e o que que esse método faz? Esse método faz o seguinte: se tiver na família 200, ele não faz nada; se não tiver na família 200, ele vai lançar uma exceção aqui neste código. Então garanta que existe um código de status de sucesso. Por enquanto é o que basta pra gente.
+
+[11:58] Próximo passo, depois que eu verifiquei que o código do status é de sucesso, 200, 201, alguma coisa assim, eu posso agora usar o corpo da resposta. O que eu quero fazer com esse corpo da resposta? No final das contas, o que eu quero fazer é ler essa resposta e transformar ela num objeto do tipo livro. É isso que eu quero fazer.
+
+[12:28] Então eu tenho que pegar essa resposta que está numa string e transformar ela num objeto livro. Então pra eu não ter que fazer isso na mão o DotNet também já nos disponibilizou métodos de extensão que já pegam uma resposta e deserializam ela em um objeto da nossa escolha.
+
+[12:55] Então o que eu quero fazer no final das contas é isso aqui: livro = resposta.Content.ReadAsAsync, e eu quero converter esse cara para um LivroApi. Reparem o seguinte: esse método também tem um Async como sufixo, vai ser executado de forma assíncrona, então eu tenho que usar o await aqui também. E aí eu vou ter no meu método Livro o meu LivroApi que foi convertido a partir desse cara.
+
+[13:56] No final das contas o que eu quero mesmo é acabar com essa chamada para o meu repositório, não quero mais chamar esse cara. Então eu vou apagar essa linha. Agora o meu model é do tipo LivroApi. Só que a view espera um tipo... Deixa eu tentar abrir a view aqui pra vocês verem. Ir para o modo de exibição. Estou abrindo a view, e ela espera um modelo que é do tipo LivroUpload.
+
+[14:36] Então gente eu preciso converter um LivroApi para um LivroUpload. Então eu vou pegar aqui Model e vou criar aqui um método chamado ToUpload. Eu acho que esse método ainda não existe. Deixa eu ver, não existe. Ctrl+Ponto. E eu vou gerar esse cara, vou dar um F12.
+
+[14:58] Agora eu tenho, aqui no LivroApi, um método chamado Upload, só que é LivroUpload. Agora eu retorno aqui um new LivroUpload. Esse ToUpload aqui é um método... Na verdade isso aqui eu não vou deixar aqui não, eu vou colocar como método de extensão. Aqui na minha biblioteca de classe Model eu vou aqui na LivrosExtensions e vou criar aqui um método estático static LivroUpload ToUpload, onde eu vou estender agora a classe LivroApi.
+
+[15:58] E aqui eu vou retornar new LivroUpload, e vou passar os valores aqui. E os valores vão ser mais ou menos esses valores que já estão aqui, então vou dar um copy and paste. Vamos ver o que está dando de erro. A lista aqui do LivroUpload é do tipo, então aqui eu tenho que botar ParaTipo. Acho que é isso LivroUpload, posso fechar aqui. Agora eu tenho no meu LivroController como converter de LivroApi para LivroUpload.
+
+[16:36] Então eu já consigo consumir a minha API fazendo uma requisição pra pegar os livros, o livro especificamente. Mas porque que está dando erro ainda aqui o método Detalhes? Está falando que o tipo de retorno de um método assíncrono deve ser void, ou Task, ou Task para um tipo.
+
+[17:10] Vamos acolher essa sugestão, na verdade é uma obrigação no meu compilador, e eu vou usar a terceira opção. Eu vou dizer que agora minha action retorna uma Task, e eu vou colocar o System.Threading.Tasks como um cara que eu estou usando.
+
+[17:36] Então agora gente eu acho que nós terminamos aí o nosso primeiro consumo da nossa API. Tirar esses caras pra cima porque eles foram só pra mostrar pra vocês a questão do BaseAdress.
+
+[17:55] Reparem que agora então, no meu método Detalhes eu não faço mais menção nenhuma ao repositório. E quando a gente terminar de colocar a API em todas as actions da minha aplicação Web eu não vou precisar mais do repositório, e a ideia era aquela mesmo.
+
+[18:13] Vamos testar então? Vou dar um Ctrl+F5. Está compilando. Já fez o login, agora eu vou clicar aqui num livro. E gente, olha que beleza, continua funcionando, não quebrou a minha aplicação. E agora eu estou fazendo a requisição para a minha API.
+
+[18:43] Ah Daniel, como é que você sabe que está funcionando? Como é que eu sei que está realmente fazendo uma requisição pra API? Então não precisa acreditar em mim, vamos aqui olhar para o meu serviço WebAPI.
+
+[18:56] Eu vou rolar aqui pra ficar tudo escuro, ou seja, não tem nada nada sendo logado aqui, e vou apertar um F5. Deixa eu até diminuir esse cara aqui pra vocês verem os dois acontecendo ao mesmo tempo. Vocês são muito desconfiados, mas tem que ser assim mesmo, todo cientista, todo estudioso curioso tem que ser desconfiado.
+
+[19:21] Então eu vou apertar aqui o F5 agora, e eu espero que agora ele logue, que está recebendo uma requisição para esse tipo 1008. Então vou dar um Enter aqui e olha só gente, vou dar um zoom aqui agora pra vocês olharem especificamente no log.
+
+[19:43] Foi feito um get para essa URI, livros/1008, e além disso, ele está inclusive logando qual foi o select que ele fez e tudo mais. E no final a requisição terminou com o código 200 nesse tempo aqui, entregando um JSON.
+
+[20:05] Então nossa primeira requisição que nós fizemos via C#, usando a classe httpClient. Só que a gente ainda tem muito trabalho pra fazer que é substituir todas as actions, que usam repositório, para usar também agora as APIs tanto de segurança, mas isso vai ser depois, quanto agora, que vai acontecer nessa aula, a API de Livros.
+
+[20:31] Então eu espero vocês, ansiosamente, no próximo vídeo.
+
+
