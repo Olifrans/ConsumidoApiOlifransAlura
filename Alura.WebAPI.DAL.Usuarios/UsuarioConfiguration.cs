@@ -13,6 +13,13 @@ namespace Alura.ListaLeitura.Seguranca
                 Email = "admin@example.org",
                 PasswordHash = "AQAAAAEAACcQAAAAED0tb8N23CW0B1uLCmdSzL1kfJKD1NqSU6VxzkJ/ATsHW8awVv+bBSmNiACpNR9Iqw==",
             });
+
+            builder.HasData(new Usuario
+            {
+                UserName = "olifrans",
+                Email = "olifrans@example.org",
+                PasswordHash = "AQAAAAEAACcQAAAAEAQrThAFfVi91otEt2PTifOTftOp7h1hhhuP1VgWwOPqFQ2KiwOrUVaApwNBcAnvGA==",
+            });
         }
     }
 }

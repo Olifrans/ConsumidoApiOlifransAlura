@@ -1,20 +1,12 @@
+using Alura.ListaLeitura.Seguranca;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Alura.ListaLeitura.Seguranca;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 
 namespace Alura.WebAPI.AuthProvider
@@ -32,13 +24,41 @@ namespace Alura.WebAPI.AuthProvider
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+
+
+
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Alura.WebAPI.AuthProvider", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ConsumidoA.WebAPI.AuthProvider", Version = "v1" });
+                //Bloco de código para Geração do token login de acesso do JWT
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    //Description = "JWT Authorization header using the Bearer scheme.\r\n\r\n Enter 'Bearer'[space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 12345abcdef\"",
+                    Description = "Cabeçalho de autorização JWT usando o esquema Bearer." +
+                    "\r\n\r\n Digite 'Portador' [espaço] e, em seguida, seu token na entrada de texto abaixo." +
+                    "\r\n\r\n Exemplo: \"O portador  12345abcdef\"",
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                          new OpenApiSecurityScheme
+                          {
+                              Reference = new OpenApiReference
+                              {
+                                  Type = ReferenceType.SecurityScheme,
+                                  Id = "Bearer"
+                              }
+                          },
+                         new string[] {}
+                    }
+                });
             });
-
-
-
 
 
 
@@ -66,7 +86,7 @@ namespace Alura.WebAPI.AuthProvider
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Alura.WebAPI.AuthProvider v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ConsumidoA.WebAPI.AuthProvider v1"));
             }
 
             app.UseHttpsRedirection();
@@ -86,7 +106,7 @@ namespace Alura.WebAPI.AuthProvider
 
 
             //Fran adicção
-            app.UseMvc();
+            //app.UseMvc();
         }
     }
 }
