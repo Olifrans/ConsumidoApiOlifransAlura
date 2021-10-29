@@ -152,3 +152,166 @@ Quando estivermos usando a API dentro da aplicação web poderemos remover as de
 SocketException: Nenhuma conexão pôde ser feita porque a máquina de destino as recusou ativamente 127.0.0.1:80
 
 
+
+
+
+
+
+
+
+
+
+06 - Consumindo a API de Star Wars
+PRÓXIMA ATIVIDADE
+
+Você gosta de Guerra nas Estrelas? Espero que sim!
+
+Sabia que existe uma API com várias informações sobre a saga? Dê uma olhada na página inicial da API.
+
+Agora vamos escrever um código para consumí-la! Veja o código do cliente Http abaixo:
+
+var httpClientSWAPI = new HttpClient();
+httpClientSWAPI.BaseAddress = "https://swapi.co/api/";COPIAR CÓDIGO
+Qual código eu deveria utilizar para obter informações sobre o personagem de Luke Skywalker (id 1)?
+
+Que a força esteja com você!!
+
+Selecione uma alternativa
+
+await httpClientSWAPI.GetAsync("people/1");
+
+await httpClientSWAPI.PostAsync("people/1");
+
+await httpClientSWAPI.GetAsync("characters/12");
+ DISCUTIR NO FORUM
+PR
+
+
+
+
+
+
+
+
+07 - Como fazer uma requisição HTTP?
+PRÓXIMA ATIVIDADE
+
+Você já aprendeu como consumir uma API usando a classe HttpClient. E se fosse necessário obter a resposta HTTP de uma URL qualquer? Por exemplo, para obter o HTML da URL http://www.caelum.com.br/ e testar o status HTTP que código você deveria escrever?
+
+Escolha a alternativa correta.
+
+Selecione uma alternativa
+
+var client = new HttpClient();
+var resp = await client.GetAsync("http://www.caelum.com.br");
+resp.EnsureSuccessStatusCode();
+var html = await resp.Content.ReadAsStringAsync();
+
+
+
+
+08 - Reutilizando o código de consumo
+
+[00:00] Próxima requisição que a gente vai mudar é a requisição pra pegar a imagem da capa do livro. Então vamos lá gente, vamos lá que a gente tem muito trabalho.
+
+[00:08] Então agora eu vou aqui na action chamada ImagemCapa e vou copiar o código que está aqui. Copiar esse código aqui, colocar aqui. Então agora eu tenho o BaseAdress, não muda. Então deixa eu tirar isso aqui também, a gente já entendeu que a questão do BaseAdress está lá. Preciso também transformar agora esse método num método assíncrono. E agora eu vou fazer um get só que pra ($"livros/{id}/capa"), essa é a nossa URI para o endpoint que pega a imagem de capa do livro.
+
+[01:08] Depois que eu peguei a resposta, eu verifiquei se está tudo bem. Agora o que eu preciso fazer é ler. Como eu estou aqui lendo, eu leio a resposta, nesse caso eu estou deserializando para um objeto do tipo LivroApi.
+
+[01:23] No caso aqui eu tenho que pegar a resposta e transformar ela num byte array, já está até aqui pra mim. Então await resposta.Content.ReadAsByteArrayAsync. Olha que beleza, já tem pra mim um método que transforma o corpo da resposta num byte array.
+
+[01:44] Vamos testar? Vamos ver se está funcionando. Ctrl+F5. A página inicial já faz um get pra todas as imagens. Então a página inicial já deve funcionar fazendo todas essas requisições agora usando a API.
+
+[02:02] Novamente, pra vocês conferirem que eu realmente estou usando, olha lá. Chamar aqui pra vocês verem o log. Dar um zoom aqui também. Deixa eu ver se eu consigo achar em algum lugar aqui.
+
+[02:35] Então aqui é um exemplo olha. Deixa eu fazer aqui um Ctrl+F1. Então aqui, por exemplo, eu tenho a requisição que está fazendo um get na capa do Livro 4. Outra coisa aqui também, agora já é o Livro 1008, então agora nós estamos fazendo já requisição para o livro de capa.
+
+[03:16] Mas vamos aproveitar esse tempinho pra gente fazer uma refatoração aqui rápida. Percebam que eu estou copiando e colando código aqui. Esse cara aqui e esse cara aqui é um código que está sendo copiado e colado.
+
+[03:30] A gente já sabe como resolver, já resolveu isso em vários cursos anteriores, e nós vamos aplicar a mesma ideia aqui. A gente vai isolar esse código numa classe, eu vou criar uma classe que vai ser responsável por consumir a API de Livros.
+
+[03:43] Então eu vou criar aqui uma pasta dentro da minha aplicação Web e essa pasta eu vou chamar de httpClients, no plural porque nós vamos ter também o cliente de autenticação. E vou criar uma classe aqui, vou chamar essa classe de LivroApiClient, é um cliente que consome a API de Livros.
+
+[04:15] Apertei aqui um enter. O que essa classe vai ter? Essa classe vai ter os dois métodos que, por enquanto, nós já temos: o método que recupera um livro e o método recupera a capa do livro.
+
+[04:27] Então vamos lá, como é um método que vai ser executado de forma assíncrona eu vou fazer aquela convenção, public async Task, como esse LivroApi ainda não existe aqui eu vou carregar esse cara, e vou usar também uma convenção GetLivroAsync(int id).
+
+[05:00] Agora eu vou pegar o código que está lá no LivroController na parte de detalhes, vou pegar esse cara aqui todo, vou copiá-lo pra minha classe LivroApiClient. Esses caras aqui eu preciso adicioná-los aqui e aqui também.
+
+[05:24] Criei o primeiro método e agora eu vou criar o segundo método aqui, public async Task<byte[]> GetCapaLivroAsync(int id), também recebendo como argumento de entrada o id do livro. Vou lá no LivroController, vou copiar esse cara aqui também. Por enquanto estou fazendo nada demais, estou copiando e colando código ainda, mas vamos ver o que que eu posso fazer pra melhorar o nosso código. Então já criei agora meu segundo método também.
+
+[06:17] O que eu posso fazer pra melhorar? Olha só, esse httpClient é um cara que pode ser criado à medida que eu criar também um objeto dessa classe aqui. Então aqui no construtor desse cara eu vou criar um campo privado aqui onde eu defino este meu amigo aqui. E esse cara aqui eu quero que seja um campo somente leitura já com um BaseAdress ali. E então agora eu já diminuí aqui um pouco o meu código. Diminuí aqui também. Então agora no construtor desse do LivroApiClient eu estou criando um httpClient.
+
+[07:12] Beleza, vamos testar isso? Agora eu vou aqui no meu ImagemCapa, o que eu preciso fazer agora é criar um objeto do tipo api = new LivroApiClient(). Esse cara, provavelmente, não está sendo ainda utilizado. Ah deixa eu só acertar aqui o namespace porque eu quero botar aqui ListaLeitura, quero usar esse namespace aqui. E agora esse cara eu também vou colocá-lo no Using.
+
+[07:50] E aqui agora é api.GetCapaLivroAsync(id). Então o nosso código já está um pouquinho melhor, ele pode ser reutilizado inclusive em outros locais, não só aqui na API. Aqui também eu vou fazer a mesma coisa LivroApiClient. Não preciso mais desse cara aqui, nem esse cara aqui. E agora eu vou dar um await api.GetLivroAsync(id).
+
+[08:31] Já podemos testar. Ctrl+F5. Vamos lá ver se a aplicação continua funcionando, pode ser que eu tenha errado alguma coisa, mas aparentemente não. O detalhe está funcionando e pegar a capa também está funcionando. Mas ainda podemos melhorar, porque reparem que o meu controlador esse LivroController depende de um objeto da classe LivroApiClient.
+
+[09:01] Como é que eu faço, qual conceito que eu uso pra dizer que uma classe depende da outra? Eu vou dizer isso aqui no meu construtor. Vou criar aqui um private readonly LivroApiClient _api, e vou pegar um desses caras aqui no construtor do meu controlador.
+
+[09:35] Vamos ver o que que vai acontecer aqui gente. Será que vai dar certo? Vamos ver. E agora eu não preciso mais criar esse cara toda vez que eu tiver uma requisição desse tipo. Não estou mais me preocupando em criar requisições pra esse cara aqui.
+
+[09:55] Beleza, uma coisa é isso, já defini aqui como dependência do meu LivroController essa API. Outra coisa que eu posso fazer também, isso é uma novidade no ASP.NET Core 2.1, é que eu tenho agora uma fábrica de clientes HttpCientFactory.
+
+[10:13] O que eu vou fazer? Esse LivroApiClient também depende de um objeto desse tipo aqui, então eu vou fazer a mesma coisa aqui, vou tirar esse cara e vou colocar esse cara aqui. Não estou mais dando new na minha classe LivroApiClient pra criar um objeto do tipo httpClient.
+
+[10:38] Quem é que vai resolver todas essas dependências pra mim? É lá na minha classe Startup. Então eu vou na minha classe Startup, aqui no ConfigureServices eu vou dizer aqui o seguinte: services.AddHttpClient para o , que ele ainda não está disponível mas agora eu adicionei.
+
+[11:07] O que esse cara aqui pode me dar? Olha só, ele tem uma sobrecarga onde eu indico algumas informações, por exemplo o BaseAdress desse cara. Então eu estou trazendo esse cara pra cá e vocês vão descobrir mais tarde porquê. Ah na verdade não é. Novamente eu comi mosca aqui, new Uri pra essa string.
+
+[11:57] Então agora o meu LivroApiClient também não tem mais esse new aqui, também tirei esse cara daqui. Então estou tentando desacoplar o máximo essa classe aqui, estou amarrando tudo isso aqui na minha classe de configuração na minha aplicação.
+
+[12:16] Vou dar um Ctrl+F5 pra testar novamente tudo de novo. Se tiver tudo funcionando a gente vai começar a usar agora essa... Ih, deu erro. Deu problema gente, vamos ver. Qual será o problema? Talvez você já tenha visto aí, deu um grito só que eu não ouvi. Desculpa, eu ouvi você falar isso.
+
+[12:32] Na verdade está faltando esse cara aqui. Será que é isso mesmo? Pois, como ele faz uma concatenação, ele não conseguiu achar aquela URL lá. E agora sim funcionou, tem agora a imagem de capa e tem os detalhes sendo retornados. E essa refatoração que eu fiz funcionou. Mas nós ainda temos muita coisa que fazer pra pegar, por exemplo, ListasLeitura e também outros métodos de crud.
+
+[13:00] Então aguardo você no próximo vídeo.
+
+
+
+09 - Consolidando seus conhecimentos
+Chegou a hora de você seguir todos os passos realizados por mim durante esta aula:
+
+criar a classe LivroApiClient para consumir a API de livros através da classe HttpClient
+criar os métodos assíncronos GetLivrosAsync() e ...
+substituir o código da action RecuperarLivros, removendo o uso do repositório para buscar os livros e usando um objeto de LivroApiClient
+Caso já tenha feito, ótimo! Se ainda não, é importante que você execute o que foi visto nos vídeos para poder continuar com a próxima aula.
+
+
+
+
+10 - Referências Utilizadas
+PRÓXIMA ATIVIDADE
+
+Essas foram as referências que utilizei para preparar essa aula.
+
+Manual da Microsoft para APIs Rest
+https://github.com/Microsoft/api-guidelines/blob/master/Guidelines.md
+
+Iniciando Requisições HTTP (artigo)
+https://docs.microsoft.com/en-us/aspnet/core/fundamentals/http-requests
+
+Classe HttpClient (referência)
+https://docs.microsoft.com/pt-br/dotnet/api/system.net.http.httpclient
+
+Paralelismo com C# na Alura
+https://www.alura.com.br/curso-online-csharp-paralelismo-no-mundo-real
+
+Sobre a convenção de finalizar nomes de métodos com o sufixo Async
+https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/#BKMK_NamingConvention
+
+
+
+11 - O que aprendemos?
+PRÓXIMA ATIVIDADE
+Nessa aula você:
+
+conheceu a classe HttpClient e a utilizou para enviar requisições HTTP de dentro de uma aplicação C#
+isolou o código de consumo da API numa classe de serviço
+configurou sua aplicação Web para injetar um objeto dessa classe sempre que um controlador precisasse
+conheceu a interface IHttpClientFactory
+descobriu um pacote com extensões para facilitar a serialização e desserialização de objetos: Microsoft.AspNet.WebApi.Client
+
+
+

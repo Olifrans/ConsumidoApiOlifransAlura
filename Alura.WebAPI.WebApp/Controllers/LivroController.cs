@@ -1,9 +1,10 @@
-﻿using Alura.ListaLeitura.Modelos;
+﻿using Alura.ListaLeitura.HttpClients;
+using Alura.ListaLeitura.Modelos;
 using Alura.ListaLeitura.Persistencia;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Alura.ListaLeitura.WebApp.Controllers
 {
@@ -11,10 +12,11 @@ namespace Alura.ListaLeitura.WebApp.Controllers
     public class LivroController : Controller
     {
         private readonly IRepository<Livro> _repo;
-
-        public LivroController(IRepository<Livro> repository)
+        private readonly LivroApiClient _api;
+        public LivroController(IRepository<Livro> repository, LivroApiClient api)
         {
             _repo = repository;
+            _api = api;
         }
 
         [HttpGet]
@@ -35,13 +37,11 @@ namespace Alura.ListaLeitura.WebApp.Controllers
             return View(model);
         }
 
+
         [HttpGet]
-        public IActionResult ImagemCapa(int id)
+        public async Task<IActionResult> ImagemCapa(int id)
         {
-            byte[] img = _repo.All
-                .Where(l => l.Id == id)
-                .Select(l => l.ImagemCapa)
-                .FirstOrDefault();
+            byte[] img = await _api.GetCapaLivroAsync(id);
             if (img != null)
             {
                 return File(img, "image/png");
@@ -50,30 +50,16 @@ namespace Alura.ListaLeitura.WebApp.Controllers
         }
 
 
-
-
         [HttpGet]
-        public IActionResult Detalhes(int id)
-        {
-            //Classe usada para encapsular reqisições http chama-se HttpClient
-
-            HttpClient httpClient = new HttpClient();
-
-            //https://localhost:44391/api/Livros/1
-            //https://localhost:44391/api/Livros/1
-
-
-            var model = _repo.Find(id);
+        public async Task<IActionResult> Detalhes(int id)
+        {            
+            var model = await _api.GetLivroAsync(id);
             if (model == null)
             {
                 return NotFound();
             }
-            return View(model.ToModel());
+            return View(model.ToUpload());
         }
-
-
-
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -97,14 +83,14 @@ namespace Alura.ListaLeitura.WebApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Remover(int id)
+        public async Task<IActionResult> Remover(int id)
         {
-            var model = _repo.Find(id);
+            var model = await _api.GetLivroAsync(id);
             if (model == null)
             {
                 return NotFound();
             }
-            _repo.Excluir(model);
+            await _api.DeleteLivroAsync(id);
             return RedirectToAction("Index", "Home");
         }
     }

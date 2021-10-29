@@ -1,0 +1,51 @@
+01 - O problema que vamos resolver
+PRÓXIMA ATIVIDADE
+
+Como emitir requisições para métodos HTTP diferentes (POST, PUT e DELETE)?
+Quando finalizarmos essa aula estaremos aptos a enviar requisições HTTP para métodos diferentes de GET.
+
+
+
+
+
+02 - Home e as outras operações do CRUD
+
+[00:00] A próxima requisição que a gente vai começar a mudar aqui na aplicação Web é a requisição pra remover um livro. Então vamos lá.
+
+[00:07] Aqui no LivroApi eu vou criar mais um método agora. Então vocês tão percebendo que pra cada endpoint, pra operação que eu tenho que usar pra consumir a API, eu vou criar um método aqui.
+
+[00:24] Eu vou criar um método aqui public async Task, esse cara não vai retornar nada então eu vou usar apenas o retorno de um task. E vou usar também a convenção de dizer que, como eu vou usar um método http Delete, eu vou colocar ele também aqui como prefixo, e como sufixo o Async. O argumento de entrada é justamente o id do livro.
+
+[00:52] Que que eu vou fazer aqui? var resposta = await _httpClient.DeleteAsync("livros/{id}"), vou interpolar aqui. E eu vou pegar essa resposta e vou verificar se ela retornou um status code 200. A remoção é muito simples.
+
+[01:26] Agora eu vou substituir no meu LivroController a parte de remover aqui. O que eu vou fazer aqui? Aqui tem duas coisas que ele faz: primeiro ele verifica se esse cara existe, se ele não existir ele vai retornar um 404.
+
+[01:39] Então aqui eu vou fazer isso: await _api.GetLivroAsync(id). Já está nos ajudando a reutilização, quando a gente isolou o método pra fazer requisição de pegar o livro, já nos ajudou eu ter isolado isso numa classe porque agora eu estou reutilizando esse método aqui. Está dando esse erro porque eu tenho que transformar esse método num método assíncrono. E agora aqui eu tenho que chamar o await _api.DeleteLivroAsync(id).
+
+[02:23] Vamos testar? Dei um Ctrl+F5 aqui na minha classe e vou apagar algum livro desse aqui. Deixa eu apagar o livro de... Vou pegar esse cara aqui do Bootstrap. Deixa eu só colocar aqui a API, vou deixar ela vazia aqui pra gente poder ver, justamente, se ele vai chegar a chamar essa requisição aqui. Vou apertar o excluir e agora o livro foi chamado lá, foi excluído, deu um redirect pra home e aí criou todas aquelas requisições praqueles livros todos lá. Então já fizemos também o remover.
+
+[03:14] Beleza, vamos lá, vamos continuar. Vamos atacar home agora. Deixar eu fechar todo mundo aqui, fechar todos os documentos e a home fica no controlador chamado HomeController. O que essa home faz? Olha, a home faz...
+
+[03:33] Só tem uma action que é pra pegar a lista de leitura daqueles vários tipos ali. Então eu vou abrir aqui novamente o LivroApiClient e vou criar aqui um método que vai, justamente, retornar uma lista de leitura específica a partir do tipo dela. GetListaLeituraAsync(TipoListaLeitura tipo).
+
+[04:07] Bom, vamos lá. Não sei se vocês vão lembrar, no curso anterior eu tive um probleminha porque o tipo ListaLeitura também faz parte do namespace. Então o que eu fiz naquela ocasião? Foi isso: eu criei aqui um alias chamado de Lista = Alura.ListaLeitura.Modelos.ListaLeitura. Então eu criei esse alias aqui e aí eu consigo usar esse cara direitinho.
+
+[04:39] O que eu tenho que fazer aqui? Eu tenho que emitir uma resposta para o seguinte recurso, tenho que fazer um GetAsync para o recurso, eu vou interpolar aqui, ($"listasleitura/{tipo}"), passando o tipo identificador dessa lista de leitura. Ótimo, agora eu peguei resposta, vou garantir que houve um status code da família 200. E, por fim, eu tenho que retornar o conteúdo lido como um tipo Lista.
+
+[05:35] Pronto, agora eu já consegui criar um método que faz uma requisição pra essa URI aqui, listasleitura passando tipo. Verifico e retorno ele deserializado num objeto do tipo Lista que é um alias para ListaLeitura.
+
+[05:51] Então aqui agora, novamente, eu tenho que também fazer a mesma coisa. Eu vou criar aqui um LivroApiClient, tem que importar aqui esse cara _api = api. Vou usar aqui a sugestão do compilador. E aqui eu vou retornar um Task<IEnumerable>, eu tenho que herdar esse task. E aqui eu vou fazer um await _api.GetListaLeituraAsync(tipo).
+
+[06:43] Que que tá dando de errado aí? Ah porque ele está pegando... Tudo bem, então eu vou dar aqui var lista, vou guardar isso aqui numa variável lista e vou dar um return lista.Livros. Continua dando erro aqui porque só pode ser usado método assíncrono. Eu esqueci novamente de fazer aqui.
+
+[07:16] Não é possível converter implicitamente... Ah, porque aqui é LivroApi e eu estou querendo um Livro. Então eu vou retornar aqui um LivroApi. Pronto. E eu vou mudar meu HomeViewModel lá também. ListaDoTipo, aqui tem que ser await pra todo mundo e eu tenho que modificar o cara lá também. Tenho que dizer que isso aqui é um método assíncrono.
+
+[08:07] Beleza, agora o HomeViewModel F12, e aqui eu vou dizer que é um enumerável de LivroApi. Mudei esse cara aqui, meu HomeController tá funcionando, a minha view provavelmente tá esperando um... Tá, acho que não vai ter problema não, vamos ver.
+
+[08:33] Então agora eu posso... Reparem que eu tô pedindo uma injeção para um objeto do tipo LivroApiClient que já está sendo amarrado lá na classe Startup, na classe de configuração. Então eu também não preciso mexer nisso. Acho que a gente já pode testar aplicação, e se tiver tudo bem, a gente vai ter a página inicial aqui.
+
+[08:58] Não estava tudo bem, porque lembram que eu mudei lá o HomeViewModel. Ele está esperando isso lá nessa view parcial aqui chamada Livro. Então a gente vai mudar isso, eu não vou precisar nem recompilar a aplicação. Vamos aqui na view, view parcial chamada Livro, o model é Livro mas eu quero um model LivroApi.
+
+[09:30] Vamos testar pra gente ver? Eu não vou precisar mexer em nada, não vou precisar compilar nada. Eu só vou dar um refresh aqui e minha expectativa é que funcione tudo direitinho, como tá funcionando aqui.
+
+[09:45] A remoção nós já testamos, a home nós já testamos, e eu deixei para o fim, aqui em LivroController, os métodos de inclusão e atualização porque eles são um pouquinho diferentes. A principal diferença é que a gente precisa tratar a questão do upload da imagem.

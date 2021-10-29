@@ -1,3 +1,4 @@
+using Alura.ListaLeitura.HttpClients;
 using Alura.ListaLeitura.Modelos;
 using Alura.ListaLeitura.Persistencia;
 using Alura.ListaLeitura.Seguranca;
@@ -9,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
+using System;
 
 namespace Alura.WebAPI.WebApp
 {
@@ -46,6 +47,15 @@ namespace Alura.WebAPI.WebApp
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
             }).AddEntityFrameworkStores<AuthDbContext>();
+
+
+
+            //HttpClient
+            services.AddHttpClient<LivroApiClient>(client => {
+                client.BaseAddress = new Uri("https://localhost:44391/api/");
+            });
+
+
 
             services.ConfigureApplicationCookie(options => {
                 options.LoginPath = "/Usuario/Login";
