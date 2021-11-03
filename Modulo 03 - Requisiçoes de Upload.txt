@@ -1,0 +1,100 @@
+01 - O problema que vamos resolver
+
+Como montar o corpo das requisições como POST e PUT, que exigem informações de entrada?
+Como montar uma requisição para fazer upload de arquivos?
+Quando aprendermos a responder tais perguntas, estaremos aptos a enviar vários tipos de requisições HTTP, com requisitos complexos e conteúdos diferentes de texto.
+
+
+
+
+
+02 - Enviando multipart/formdata
+[00:00] Galera, abre aí o formulário de inclusão de livro pra gente poder estudar uma parada aqui. Olha só, abre também a ferramenta do desenvolvedor na aba Network porque eu vou querer analisar a requisição que vai ser enviada no formulário.
+
+[00:16] Então a gente vai colocar alguns valores aqui, valores qualquer. Fulano de tal, Lendo... Pode ser o ParaLer mesmo. Vou apertar o botão gravar aqui e ele vai fazer a inclusão do livro aqui na aba ParaLer. Mas o importante é essa requisição aqui, que é a requisição de envio do formulário.
+
+[00:44] Vamos dar uma olhadinha aqui, vou dar até um zoom pra vocês verem aqui. Tem informações gerais da requisição, qual é a URL e tudo mais, qual é o método, qual é o statuscode, tem informações sobre o cabeçalho da resposta. Mas o que eu quero mostrar pra vocês é o cabeçalho da requisição onde nós temos o tipo de conteúdo da requisição, que, no caso, não é mais JSON, é um multipart/form-data.
+
+[01:11] Não sei se vocês vão lembrar, quando você quer enviar arquivos para upload você tem que colocar um atributo no seu formulário desse tipo aí. Então agora nossa requisição, tanto de inclusão como de alteração, será diferente porque eu não vou mais enviar um JSON, uma sring normal, eu tenho que enviar esse tipo aí.
+
+[01:36] Então como que eu faço isso lá no VisualStudio? Vamos lá fazer isso. Deixa eu voltar aqui, fechar esse cara. E no VisualStudio eu vou começar lá naquela minha classe LivroApiClient criando um método pra representar a inclusão do livro.
+
+[01:55] O método é assíncrono, então eu vou botar o async, vou ter o Task de retorno e vou usar a convenção PostLivroAsync, seu argumento de entrada é um (LivroUpload model). E ele é basicamente muito parecido com todos os outros métodos que a gente já fez, só que agora ele faz um Post, não é PostAsJson é PostAsync, para a URI livros com a BaseAdress e agora Livros, e aqui eu vou passar um conteúdo, que eu ainda não sei o que que ele é. Por fim, eu vou querer pegar e verificar se a resposta estava dentro da família 200.
+
+[02:55] Bom, quem é esse cara content aí? Vou criar mais uma linha aqui. Esse content é do tipo HttpContent que representa conteúdos que vão ser enviados em requisições. Então eu estou chamando esse cara aqui. Só que esse tipo HttpContent é um tipo abstrato, não posso criar objetos dele tem que criar filhos. E qual é o filho que eu quero criar? MultipartFormData.
+
+[03:25] Então eu vou criar um método aqui onde eu vou isolar a criação deste MultipartFormDataContent, onde eu vou isolar a criação desse conteúdo. Ctrl+Ponto. E aí ele vai criar aqui esse método pra mim. Então esse cara é do tipo MultipartFormDataContent e eu vou retornar esse cara pra mim.
+
+[04:12] Acabou o código? Não, não acabou o código porque agora eu tenho que colocar as partes neste conteúdo que tem múltiplas partes. Mas que partes são essas? É cada campo que tem no formulário. Então cada campo que tem no formulário vai ser uma parte nesse conteúdo. Os campos mais comuns vão ser do tipo string, um conteúdo textual, e o campo que é a imagem que será feito o upload será de um tipo diferente.
+
+[04:47] Então, vamos lá. Como é que eu adiciono partes nesse conteúdo? Usando um método chamado Add, e eu vou passar dois argumentos de entrada: qual é o conteúdo que está embaixo, no caso nosso, para os campos mais básicos, é StringContent; e a outra coisa que eu vou passar é o nome do campo, no caso título, pra ele fazer o binding lá no objeto LivroUpload, deserializar, ele precisa saber pra que propriedade ele vai fazer deserialização.
+
+[05:26] Só que esse campo aqui, eu preciso dizer que ele é envolvido com aspas duplas. Eu perdi um bom tempo aí na internet procurando, eu estava tomando erro direto na hora de enviar esse cara. Então eu espero que esse tempo que eu tenho pedido seja o tempo que vocês vão ganhar com esse curso aqui.
+
+[05:51] Muito bem, então agora eu vou também passar aspas duplas para o campo subtítulo. Vou adicionar também um conteúdo do tipo StringContent para o resumo, e o nome do campo é resumo.
+
+[06:11] Opa pera aí tem uma coisa errada aqui gente. Aqui é vírgula. Não, não é isso que eu estava querendo falar que é errado não. O que está errado aqui é o seguinte, olha só, aqui eu coloquei as aspas duplas, aqui eu coloquei só no primeiro, aqui eu esqueci de botar nos dois. Está estranho, está muito frágil, tá muito vulnerável a erros aqui.
+
+[06:32] Então o que eu vou fazer? Eu vou criar um método que é responsável por colocar as aspas duplas nessa string. Só pra isso mesmo. Vou criar um método chamado EnvolveComAspasDuplas o valor que é recebido como argumento de entrada. Esse cara vai retornar isso aqui, vai retornar uma interpolação do valor, mas que tenha as aspas na frente e aspas no final.
+
+[07:13] Agora eu vou pegar e vou chamar esse método a cada campo que eu quiser adicionar no meu MultipartFormDataContent. Caraca, consegue falar isso rápido? MultipartFormDataContent. Beleza, então agora eu tenho aqui mais um EnvolveComAspasDuplas o Resumo.
+
+[07:40] O que mais? Que outros conteúdos eu tenho que adicionar? Tenho que adicionar o autor gente. Vamos lá, new StringContent para o Autor, cujo campo é autor. Mais um conteúdo, qual é? Lista. Qual é a lista que eu vou adicionar? StringContent(model.Lista.ParaString()), no campo chamado de lista. Aqui eu esqueci o T, olha que beleza.
+
+[08:22] Bom, então passamos todas as partes mais simples, agora falta o arquivo de upload. Primeira coisa, preciso verificar se essa imagem de capa não está nula, porque se ela tiver nula eu nem vou colocar esse conteúdo lá.
+
+[08:49] Segundo, agora não é mais um StringContent, é um outro filho de HttpContent. Qual é? É um ByteArrayContent. E eu vou pegar o modelo, a capa, e convertê-lo para Byte. Agora eu posso adicionar esse cara imagemContent, tenho que envolver aqui com aspas duplas o nome do campo, que é, no caso, capa também.
+
+[09:21] Só que tem um detalhe gente, o ByteArray ele pode ser qualquer coisa, pode ser convertido pra qualquer outro formato, então eu tenho que dizer que tipo de conteúdo é esse ByteArray. Então, eu vou dizer isso no cabeçalho. Então imagemContent.Headers, vou adicionar aqui um cabeçalho onde eu digo que o tipo de conteúdo é uma imagem PNG. Poderia ser um PDF né, posso fazer o upload de um PDF, de um Excel. Então eu tenho que dizer que tipo é esse.
+
+[09:55] Muito bem, eu acho que agora nós já estamos prontos pra testar. Já criei aqui o método que faz o Post, já coloquei aqui Multipart e envolvi com aspas duplas. Vamos agora então aqui na minha Action que inclui, efetivamente, o nosso livro, eu agora vou fazer um await _api.PostLivroAsync, passando como argumento de entrada o model.
+
+[10:25] Está dando erro porquê? Porque eu preciso informar que esse método agora é um método assíncrono. Ótimo, já posso testar. Vamos testar pra ver o que vai acontecer. Claro que vai funcionar de primeira porque testei isso várias vezes. Vamos ver. Vou passar aqui um cara, algum valor qualquer aqui, na lista Lendo. Gravar. Muito bem, gravou aqui o nosso cara. Olha só, que beleza. Gravou ele aqui perfeitamente.
+
+[11:08] Bom, o que eu preciso fazer agora é criar um cara... Deixa eu voltar aqui, esse cara, OK, botei ele aqui. Vou criar um cara agora com uma imagem. Estou achando que eu estou muito otimista hoje, vou botar uma imagem aqui, vamos ver que que vai acontecer. Botar aqui o livro de Xamarin vou gravar e... Nada, não funcionou gente. Por que será? Que será que aconteceu? Eu coloquei todo o código lá pra isso. Vamos lá ver.
+
+[11:50] Então o que acontece é o seguinte, uma coisa que vocês podem também passar por aí, eu demorei um pouco pra descobrir, que esse cara aqui, eu quis mostrar o erro pra justamente vocês prestarem atenção. Quando você está colocando um upload de arquivo, você precisa também passar qual é o nome do arquivo, não precisa ser o nome real, pode ser qualquer nome, mas tem que passar isso como um outro valor aqui no método que adiciona aquele ByteArray no conteúdo.
+
+[12:38] Então pra upload, você tem que passar o conteúdo com o tipo desse conteúdo, dizer qual é o campo, mas também dizer qual é o nome do arquivo que vai ser usado lá na frente.
+
+[12:53] Então Ctrl+F5, pra agora ver se consegue realmente fazer isso funcionar de vez. Vou adicionar aqui novamente um livro. Percebam que eu estou nervoso. Vamos colocar aqui novamente aquele livro Xamarim. E... Olha que beleza, agora funcionou. Então, lembrem-se disso, pra fazer upload de arquivos você tem que passar também um nome pra esse arquivo.
+
+[13:24] Então agora eu estou pronto pra fazer também a alteração, por exemplo eu quero alterar esse cara aqui e quero botar imagem de capa, e quero que ele use a API. Ainda não está funcionando isso. Então vamos lá.
+
+[13:40] Agora vai ser rápido porque tá tudo pronto, eu apenas tenho que criar esse método aqui public async, que é um método assíncrono que retorna uma Task mas que faz o Put. LivroUpload recebendo model. Vou copiar esse código aqui e vou só mudar agora, em vez de Post é um PutAsync.
+
+[14:13] Aqui no meu LivroController eu tenho que ir agora no método em que eu altero o detalhe pra fazer essa alteração. E o código vai ficar muito mais simples, vou tirar tudo isso aqui, vou fazer um await _api.PutLivroAsync(model); é claro que informando que este método agora é assíncrono.
+
+[14:52] Vamos recompilar a nossa aplicação. E eu vou fazer alteração agora nesse livro pra colocar uma imagem de capa qualquer. Sei lá, qualquer uma aqui. Coloquei aqui uma imagem de capa, vou dizer que esse cara que foi editado também. Gravar. Ih rapaz, deu erro. O que que tá acontecendo aqui? Bad Request. O que deve estar acontecendo? Ele chegou naquele método Ensure, pra garantir que a família 200 estava usando, e deu um erro de Bad Request. Vamos ver na API o que está acontecendo, vamos lá.
+
+[15:39] Vou abrir aqui na API o meu controlador que recebe essa requisição e aqui o que está acontecendo é que o meu método de alteração, também o de incluir, todos eles estão tentando fazer o binding do meu modelo, no caso do tipo LivroUpload, através do corpo e, na verdade, como eu estou mandando via formulário, eu tenho que modificar esse atributo aqui pra FromForm.
+
+[16:18] Ah Daniel, por que que a inclusão funcionou? A inclusão funcionou porque eu tinha testado anteriormente e já tinha feito a modificação aqui pra FromForm, no caso da inclusão, e eu estava executando um serviço de API já com essa modificação aqui, e não estava funcionando para o alterar. Então por isso que estava funcionando para inclusão.
+
+[16:43] Vamos lá, API, os dois agora estão com FromForm. Eu vou chegar aqui agora e vou tentar novamente. Vou voltar aqui pra minha Lista de Leitura, fazer o refresh, ele vai fazer tudo lá. Vou agora tentar alterar esse livro de capa aqui para o Meteor e vou colocar como editado, vou apertar o botão gravar. E olha lá gente, agora nós temos o livro Meteor.
+
+[17:11] Mas estranho, eu tinha dois livros aqui, agora eu tenho três, porque isso? Por que isso está acontecendo? Vou editar aqui de novo, vou botar agora aqui um outro texto. Tinha três lá, não é isso? Gravar. Um, dois, três, quatro. Que que está acontecendo gente? Tem alguma coisa estranha acontecendo aqui.
+
+[17:39] Vamos lá ver o código de novo, e essa é uma informação muito simples, provavelmente você deve estar gritando aí já e eu não estou te ouvindo, mas na verdade é o seguinte: na hora que eu crio um conteúdo para a alteração de um livro, eu preciso passar mais uma parte nesse formulário, que é o que? É o id do livro. Esse cara eu preciso passar.
+
+[18:08] E tem um detalhe importante aqui, esse id agora eu não posso passar sempre, eu tenho que conferir se esse cara está vazio. Então se esse id for menor ou igual a zero, na verdade se ele for maior zero, aí eu vou criar um conteúdo do tipo new StringContent passando aqui o id, ToString, converter ele pra string, e o nome do campo vai ser o id.
+
+[18:59] Podemos testar então agora pra ver se a alteração vai voltar a funcionar. Ctrl+F5. Vai voltar não né, vai funcionar, porque até agora ela não funcionou Daniel, presta atenção. Vamos lá, vou pegar esse cara aqui, aqui vou botar editado, vou botar alguma coisa aqui, eu vou botar uma capa diferente, aqui o meu amigo Flávio. Gravar. Ah legal, agora funcionou. Agora eu estou realmente editando esse cara aqui.
+
+[19:36] Então, só para não ficar esse monte de livro feio aqui, vou excluir esses caras, vou excluir também o livro aqui do Meteor, vou excluir esse cara aqui, vou excluir esse cara aqui. E agora nós temos aqui os livros. Cangaceiro JavaScript, ok, esse cara aqui. Vou botar vazio aqui. Aqui Flávio Almeida. Tudo bem, deixa esse cara aqui vazio, vou botar um gravar aqui. Ih, e aí gente? Outro erro, está difícil de eu conseguir terminar esse vídeo.
+
+[20:18] Então, na verdade, esse erro está acontecendo por que? Porque se o subtítulo é nulo, eu não posso adicioná-lo como parte do meu StringContent. Então eu tenho que fazer essa última modificação aqui. Na verdade, o que é obrigatório aqui no formulário? Na verdade, o que é obrigatório é apenas a lista e o título. Então eu tenho que fazer esse cara aqui pra todos esses caras.
+
+[20:55] Esse código está meio estranho mas eu vou deixar a critério de vocês para melhorá-lo.
+
+[21:05] Então vou adicionar esse cara pra cá. Vou fazer a mesma coisa para o resumo. Subindo aqui. E vou fazer a mesma coisa para o nosso autor, então eu vou verificar se a string onde o autor está cadastrado está vazia. E agora eu espero que tudo funcione a contento. Olha lá.
+
+[21:53] Então eu vou ter que agora testar a inclusão e a alteração novamente. Então aqui ó: Cangaceiro JavaScript, aqui eu vou deixar vazio, aqui no autor eu vou botar o Flávio Almeida. Gravar. Opa, beleza. Funcionou e deixou aqui o cara vazio. Muito bom. Beleza.
+
+[22:23] Vou testar também agora com o autor vazio. Funcionou, autor ficou vazio, mas eu quero acertar isso aqui. Deixa eu acertar esse cara aqui também pra ficar bonito. Ok, gravei, está lá.
+
+[22:40] Vou testar agora uma inclusão, tudo vazio. Ele dá um erro aqui. Ok, show de bola. E seu eu botar aqui tudo vazio? Funcionou. Tudo vazio, apenas o título definido.
+
+
+
+

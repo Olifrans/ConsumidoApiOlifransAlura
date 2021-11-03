@@ -49,3 +49,84 @@ Quando finalizarmos essa aula estaremos aptos a enviar requisições HTTP para m
 [09:30] Vamos testar pra gente ver? Eu não vou precisar mexer em nada, não vou precisar compilar nada. Eu só vou dar um refresh aqui e minha expectativa é que funcione tudo direitinho, como tá funcionando aqui.
 
 [09:45] A remoção nós já testamos, a home nós já testamos, e eu deixei para o fim, aqui em LivroController, os métodos de inclusão e atualização porque eles são um pouquinho diferentes. A principal diferença é que a gente precisa tratar a questão do upload da imagem.
+
+
+
+
+
+03 - Fixando o conhecimento
+
+Considere a classe LojaApiClient, responsável pelos métodos de consumo de uma api de uma loja virtual.
+
+Considere também o controlador ProdutoController que possui actions para produtos. Veja que no código do controlador ainda utilizamos o repositório de produtos.
+
+public class ProdutoController: Controller
+{
+    private readonly IRepositorio<Produto> _repo;
+
+    public ProdutoController(IRepositorio<Produto> repo)
+    {
+        _repo = repo;
+    }
+
+    public IActionResult Index()
+    {
+        return View(_repo.Todos);
+    }
+
+    public IActionResult Excluir(int id)
+    {
+        var produto = _repo.BuscarPorId(id);
+        if (produto != null)
+        {
+            _repo.Remover(produto);
+            return RedirectToAction("Index");
+        }
+        return NotFound();
+    }
+}COPIAR CÓDIGO
+Que mudanças são necessárias para que ProdutoController passe a consumir LojaApiClient?
+
+Selecione uma alternativa
+
+Trocar o código que usa o repositório por um que consuma a API, por exemplo no método Index:
+
+solicitar uma instância de LojaApiClient via construtor do controlador
+substituir o código que usa o repositório por chamadas aos métodos da classe cliente
+substituir as assinaturas das actions para deixá-las assíncronas com o uso das palavras reservadas aync/await quando necessário e retornando uma Task<IActionResult>
+ DISCUTIR NO
+
+
+
+
+
+
+04 - Pensando à frente...
+
+Sem olhar para documentação ou assistir a qualquer vídeo (de verdade hein!), reflita sobre a resposta da seguinte pergunta:
+
+Quais serão os métodos da classe HttpClient que enviarão requisições para os verbos HTTTP POST e PUT?
+Alternativa correta
+PostAsync() e PutAsync()
+Respondeu sem nem pestanejar. Muito bem!
+
+
+
+
+
+05 - Consolidando seus conhecimentos
+
+Chegou a hora de você seguir todos os passos realizados por mim durante esta aula:
+
+incluir os métodos assíncronos GetListaLeituraAsync() e DeleteLivroAsync()
+substituir as actions correspondentes com chamadas para os métodos acima
+Caso já tenha feito, ótimo! Se ainda não, é importante que você execute o que foi visto nos vídeos para poder continuar com a próxima aula.
+
+
+
+
+
+
+06 - O que aprendemos?
+
+Nessa aula você continuou a substituir o código das actions para consumir nossa API, ainda sem autenticação. Para isso: você aprendeu a enviar requisições para os verbos HTTP DELETE e descobriu o padrão para enviar requisições para outros tipos de verbos HTTP.
