@@ -1,0 +1,87 @@
+01 - Ajustando o login
+Transcrição
+[00:00] Então nós vimos que não fica muito bem a gente passar as informações de login fixas no código, isso aí é péssimo. Então o que a gente precisa fazer agora é pegar as informações de login e senha que estão sendo passadas, pelo usuário, lá na tela de login.
+
+[00:19] Então a página de login, aquele formulário de login, o usuário vai e digita suas informações, suas credenciais, e se tudo tiver ok, a gente vai gerar um token a partir dessas credenciais.
+
+[00:34] Essa página de login, formulário, é submetido para o controlador UsuarioController. Então é lá que a gente vai começar a trabalhar esse código de gerar o token a partir das credenciais enviadas pelo usuário.
+
+[00:48] Aqui tem uma Action chamada Login, e essa Action Login está fazendo autenticação através do Identity, e a gente vai mudar isso. Então a primeira coisa que eu quero fazer é já chamar a minha API de autenticação aqui. Então aqui seria PostLoginAsync, onde eu passo o modelo como argumento de entrada.
+
+[01:18] Preciso resolver agora esse objeto e eu vou resolver isso através já de um mecanismo bastante conhecido pela gente que é a injeção de dependência. AuthApiClient. Vou aqui pegar o namespace, vou definir um campo privado pra guardar essa informação. Campo privado somente leitura, ótimo. E agora eu já tenho esse PostLogin.
+
+[01:51] Reparem aqui como está estruturado esse código, a gente tá fazendo a autenticação através do Identity e esse método retorna um objeto, do tipo SignInResult, que tem uma propriedade dizendo se a autenticação foi bem sucedida ou não.
+
+[02:15] Se não foi bem sucedida, ele volta para o formulário dizendo que houve um erro de autenticação. Eu quero manter essa mesma estrutura aqui, então eu vou modificar o meu método PostLoginAsync para retornar também um resultado do login.
+
+[02:33] Então vou apertar F12 aqui e vou fazer uma modificaçãozinha aqui nesse cara. Primeiro eu vou criar uma classe que vai representar esse conceito de resultado de login, public class LoginResult. Vai ter uma propriedade booleana que vai representar se foi bem sucedido ou não. E vai ter uma propriedade string que vai apresentar o token que eu guardei da requisição de login.
+
+[03:10] Então agora aqui eu já não vou mais gerar uma exceção se eu tiver erro, eu vou passar isso como um booleano para quem me chamou. Então eu vou aqui retornar um novo LoginResult.
+
+[03:29] Eu tenho que mudar aqui também já que não é mais uma string que eu vou retornar. Vou então criar um novo LoginResult cuja propriedade, Succeeded, é justamente o resultado desse StatusCode de sucesso.
+
+[03:48] E a propriedade token vai ser populada pela leitura do conteúdo que está na resposta. Então, primeira modificaçãozinha aí, rápida, pra gente manter essa mesma estrutura aqui no Login Controller.
+
+[04:06] Então olha só gente, agora eu já posso pegar aqui e criar esse result e comentar esse cara. O que está dando errado? Não tem? Então eu devo ter escrito errado aqui, que eu sempre confundo este cara. Ctrl+R. Succeeded. LoginResult. Ah, desculpa. Claro, é um método que é assíncrono. Claro Daniel, presta atenção.
+
+[04:42] Beleza, então agora eu estou mantendo essa estrutura. Então agora aqui eu já tenho o token. Já fiz o login na requisição e já tenho o token. Mas agora eu não estou mais usando autenticação via Identity, qual autenticação que eu vou usar? Eu vou usar uma autenticação mais simples, mas que permite ainda que eu guarde esse token para ser utilizado nas próximas requisições daquele usuário.
+
+[05:08] Eu preciso voltar àquela ideia de que esse usuário eu vou ter que guardar o estado das requisições desse usuário, isso é feito através de cookies e sessões.
+
+[05:23] Esse nosso controlador aqui tem uma propriedade chamada HttpContext que tem um método chamado SignInAsync, e esse método me permite fazer autenticação através de vários esquemas de autenticação. Inclusive o Identity está fazendo internamente esse método Password SignInAsync, está chamando esse cara aqui com o seu próprio esquema de autenticação.
+
+[05:58] Mas agora eu estou usando esse SignInAsync diretamente e eu vou colocar aqui, como argumento de entrada, duas informações. Primeiro, qual é o esquema de autenticação que eu estou usando e, segundo, quais são as informações que eu quero guardar neste cookie.
+
+[06:13] Então o esquema da autenticação é esse aqui: "Cookies". E as informações que eu vou guardar eu vou criar um objeto chamado claimsPrincipal, por quê? Pera aí que ele não está achando esse cara aqui, tem que usar aqui a autenticação namespace.
+
+[06:45] Porque esse objeto é do tipo ClaimsPrincipal e esse objeto é criado através de um construtor que recebe uma identidade. Pode ser várias maneiras de criar esse claims, mas uma delas é uma identidade para aquele usuário principal.
+
+[07:05] Então aqui claimsIdentity, também um objeto do tipo ClaimsIdentity. Então eu estou fazendo de trás pra frente pra vocês verem as coisas acontecendo devagarzinho.
+
+[07:23] Esse cara aqui é criado também por um construtor só que com dois argumentos. O primeiro argumento é uma lista de políticas que vão estar associadas à essa identidade, vou chamar essas políticas de claims.
+
+[07:42] E o segundo argumento é, justamente, qual é o esquema de autenticação. Lista de políticas, List. A lista não foi importada, importei agora. E essa lista eu vou criar aqui com quantas informações eu quiser associar à esta identidade aqui.
+
+[08:15] Eu vou criar uma claim pra dar um nome pra essa claim, ClaimTypes.Name, e vou usar o login pra guardar o valor nesta claim. Vou criar também uma outra, a segunda e última aqui, essa aqui é customizada, e vou chamar ela de Token e vou guardar, justamente, o meu token neste cara.
+
+[08:46] Então gente, o que vai acontecer é que aqui eu fui criando esses objetos, primeiro eu criei a lista de políticas, associei uma identidade e peguei essa identidade e associei a um usuário principal.
+
+[09:00] Por fim, eu fiz a autenticação deste usuário principal no esquema de autenticação de cookies e isso vai ficar agora disponível através de um cookie de autenticação. Já não estou mais usando o esquema de autenticação do Identity, mudei para o esquema de autenticação de cookies.
+
+[09:22] Vamos compilar aqui a aplicação, vamos ver o que vai dar. Eu vou apertar o botão direito, compilar aqui. Vamos ver se vai dar algum erro. Deu um erro aqui. Não foi possível... Beleza, ele está agora reclamando porque eu não estou mais retornando a string no token. Eu vou, por enquanto, comentar esse código porque esse a gente vai mudar mesmo.
+
+[09:48] Então vou compilar novamente. Compilou. Vou subir agora a aplicação Web. Vai dar erro, a gente já sabe que vai erro na Home, mas eu estou preocupado com a página de login, quero saber se vai dar algum tipo de erro no momento do login. Apertar o login aqui.
+
+[10:14] Tudo bem. Então, deu erro, mas olha o erro que deu: InvalidOperation, No sign-in authentication handler está registrado, quer dizer, nenhum manipulador de autenticação está registrado para o esquema cookies, o esquema registrado atualmente é Identity.
+
+[10:35] A gente não falou que ia mudar? Falou que ia mudar, só que a gente não mudou aonde? Lá na classe do Startup, na classe de configuração. Então vamos lá. Vou abrir agora a classe Startup aqui e vocês vão reparar que eu estou usando Identity e eu não quero isso, não quero usar esse Identity mais, eu quero usar agora outro esquema de autenticação.
+
+[11:01] Vou comentar esse cara e vou dizer aqui services.AddAuthentication. Vou dizer adicione autenticação para o esquema cookies. Além disso, eu quero definir algumas informações para configurar o cookie, quais são elas?
+
+[11:42] Eu tenho que dizer que, agora, o caminho de autenticação... Ah, ele tá aqui já só que esse cara vai morrer. É esse cara aqui. Vou deixar ele aqui. Opa, tem que ter um igual. Beleza, eu posso tirar esse cara aqui. Ctrl+C. Então agora eu disse que a autenticação da minha aplicação Web mudou de Identity para o esquema Cookies.
+
+[12:16] Percebam gente que esse nome tem que ser exatamente igual ao nome que está aqui e aqui. Sabendo disso o ASP.NET criou pra gente uma constante pra guardar esse nome e a gente não precisar usar uma string e ficar passível de erros. A gente sabe que valores dentro de string o compilador não consegue pegar.
+
+[12:39] Então, eu vou substituir também aqui, de uma vez, por uma constante chamada CookieAuthenticationDefaults. Preciso adicionar o namespace nesse cara. E aqui eu tenho uma constante chamada AuthenticationScheme.
+
+[13:07] Então isso aqui é apenas pra eu não ter que ficar escrevendo a string e, de repente, escrever alguma coisa errada aqui. Vou fazer a mesma coisa aqui. Provalvemente eu vou ter que adicionar. Sim, adicionar esse cara, ok. Será que agora vai funcionar. Ctrl+F5.
+
+[13:38] Beleza, agora eu tô com outro erro mas é um erro bobo, na verdade. Eu estou chamando aqui a tela de login, vocês tão vendo aqui usuário e login, e está dando erro porque ele não conseguiu resolver o serviço do tipo UserManager.
+
+[13:55] Por que gente? Porque na hora de você criar o UsuarioController eu estou dizendo que eu dependo de um UserManager, e quando eu comentei o esquema de autenticação por Identity ele deixou de injetar esse cara, a gente não sabe mais como injetar esse cara.
+
+[14:19] De fato a gente não precisa mais deles então eu vou aproveitar e já vou remover esses dois caras aqui. Percebam como meu código está ficando mais limpo, estou dependendo de menos coisas aqui.
+
+[14:39] Aqui eu estou querendo fazer um SignOutAsync no Identity, vou passar fazer o SignOutAsync no HttpContext. Aqui é o código de registro do usuário e a gente vai ver isso depois, não agora. Então o que eu vou fazer é comentar esse código todo aqui. Pronto. Depois a gente vê a parte de registro de usuário, agora não é tão importante pra gente isso.
+
+[15:30] Vamos testar novamente. Ctrl+F5. Bom, já não deu erro, isso é legal. Admin, 123, login. Beleza, agora voltou ao erro 401 porque eu, lá naquele meu GetListaLeitura e GetImagemCapa, não estou mais passando a autorização porque eu quero agora pegar daquele token que está guardado no cookie.
+
+[16:03] Olha só, deixa eu mostrar pra vocês aqui, deixa eu ver se eu consigo mostrar, Application, Local Storage, Cookies, localhost. Nós temos agora aqui um cookie com informações sobre esse usuário que está logado aqui sendo que as informações eu coloquei duas, o nome que é o login, o usuário, e também o token.
+
+[16:35] Então no próximo vídeo a gente vai ver como que eu vou extrair esse token daí pra usar lá nas requisições que vão consumir a API de Livros. Abraço.
+
+
+
+
+
+

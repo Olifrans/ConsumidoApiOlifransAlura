@@ -1,6 +1,4 @@
 using Alura.ListaLeitura.HttpClients;
-using Alura.ListaLeitura.Modelos;
-using Alura.ListaLeitura.Persistencia;
 using Alura.ListaLeitura.Seguranca;
 using Alura.WebAPI.WebApp.Formatters;
 using Microsoft.AspNetCore.Builder;
@@ -28,15 +26,9 @@ namespace Alura.WebAPI.WebApp
         {
             services.AddControllersWithViews();
 
-
-
-
             //Frans adição
-            services.AddDbContext<LeituraContext>(options => {
-                options.UseSqlServer(Configuration.GetConnectionString("ListaLeitura"));
-            });
-
-            services.AddDbContext<AuthDbContext>(options => {
+            services.AddDbContext<AuthDbContext>(options =>
+            {
                 options.UseSqlServer(Configuration.GetConnectionString("AuthDB"));
             });
 
@@ -48,22 +40,27 @@ namespace Alura.WebAPI.WebApp
                 options.Password.RequireLowercase = false;
             }).AddEntityFrameworkStores<AuthDbContext>();
 
-
-
             //HttpClient
-            services.AddHttpClient<LivroApiClient>(client => {
+            services.AddHttpClient<LivroApiClient>(client =>
+            {
                 client.BaseAddress = new Uri("https://localhost:44391/api/");
+                //client.BaseAddress = new Uri("https://localhost:6000/api/");
+            });
+
+            services.AddHttpClient<AuthApiClient>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:44389/api/");
+                //client.BaseAddress = new Uri("https://localhost:5000/api/");
             });
 
 
-
-            services.ConfigureApplicationCookie(options => {
+            services.ConfigureApplicationCookie(options =>
+            {
                 options.LoginPath = "/Usuario/Login";
             });
 
-            services.AddTransient<IRepository<Livro>, RepositorioBaseEF<Livro>>();
-
-            services.AddMvc(options => {
+            services.AddMvc(options =>
+            {
                 options.OutputFormatters.Add(new LivroCsvFormatter());
             }).AddXmlSerializerFormatters();
         }

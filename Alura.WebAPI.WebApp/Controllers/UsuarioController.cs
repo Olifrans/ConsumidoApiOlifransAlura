@@ -1,9 +1,12 @@
-﻿using Alura.ListaLeitura.Seguranca;
+﻿using Alura.ListaLeitura.HttpClients;
+using Alura.ListaLeitura.Seguranca;
 using Alura.ListaLeitura.WebApp.Models;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Alura.ListaLeitura.WebApp.Controllers
@@ -12,11 +15,16 @@ namespace Alura.ListaLeitura.WebApp.Controllers
     {
         private readonly UserManager<Usuario> _userManager;
         private readonly SignInManager<Usuario> _signInManager;
+        private readonly AuthApiClient _authApiClient;
 
-        public UsuarioController(UserManager<Usuario> userManager, SignInManager<Usuario> signInManager)
+        public UsuarioController(
+            UserManager<Usuario> userManager, 
+            SignInManager<Usuario> signInManager, 
+            AuthApiClient authApiClient)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
+            this._userManager = userManager;
+            this._signInManager = signInManager;
+            this._authApiClient = authApiClient;
         }
 
         [HttpGet]
@@ -34,9 +42,13 @@ namespace Alura.ListaLeitura.WebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Login, model.Password, false, false);
+                var result = await _authApiClient.PostLoginAsync(model);
+                //var result = await _signInManager.PasswordSignInAsync(model.Login, model.Password, false, false); //Autenticação Identity
                 if (result.Succeeded)
                 {
+                    ClaimsIdentity claimsIdentity = new ClaimsIdentity();
+                    ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+                    await HttpContext.SignInAsync("Cookies", claimsPrincipal);
                     return RedirectToAction("Index", "Home");
                 }
                 ModelState.AddModelError(String.Empty, "Erro na autenticação");
@@ -51,6 +63,10 @@ namespace Alura.ListaLeitura.WebApp.Controllers
         {
             return View();
         }
+
+
+
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

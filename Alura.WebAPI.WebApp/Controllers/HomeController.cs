@@ -1,28 +1,24 @@
 ﻿using Alura.ListaLeitura.HttpClients;
 using Alura.ListaLeitura.Modelos;
-using Alura.ListaLeitura.Persistencia;
 using Alura.ListaLeitura.WebApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Alura.ListaLeitura.WebApp.Controllers
 {
-    //[Authorize]
+    [Authorize]
     public class HomeController : Controller
     {
-        private readonly IRepository<Livro> _repo;
         private readonly LivroApiClient _api;
 
-        public HomeController(IRepository<Livro> repository, LivroApiClient api)
+        public HomeController(LivroApiClient api)
         {
-            _repo = repository;
             _api = api;
         }
 
-        private async Task <IEnumerable<LivroApi>> ListaDoTipo(TipoListaLeitura tipo)
+        private async Task<IEnumerable<LivroApi>> ListaDoTipo(TipoListaLeitura tipo)
         {
             var lista = await _api.GeListaLeituraAsync(tipo);
             return lista.Livros;

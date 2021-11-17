@@ -98,3 +98,116 @@ Quando aprendermos a responder tais perguntas, estaremos aptos a enviar vários 
 
 
 
+
+
+
+
+
+
+
+03
+Ajude Nestor a enviar um formulário para sua API
+PRÓXIMA ATIVIDADE
+
+Nestor está enviando os dados de seu formulário através do código abaixo.
+
+Aqui o código para enviar a requisição...
+
+public async Task PostLivroAsync(LivroUpload livro)
+{
+    var resposta = await httpClient.PostAsync($"livros", livro);
+    resposta.EnsureSuccessStatusCode();
+}COPIAR CÓDIGO
+...e aqui o código da action:
+
+[HttpPost]
+public async Task<IActionResult> Incluir([FromQuery] LivroUpload livro)
+{
+    await _api.PostLivroAsync(livro);
+    //continuação do código...
+}COPIAR CÓDIGO
+Mas o código não está nem compilando. O que Nestor deve fazer para fazer com que o livro seja incluído através da API?
+
+Selecione uma alternativa
+
+Alterar o método de envio da requisição para GetAsync().
+
+
+Criar um objeto do tipo MultipartFormdataContent e embrulhar o livro nele, passando esse objeto como argumento do método PostAsync(), conforme código abaixo (nele omiti o método CreateMultipartFormdata()). Além disso é preciso mudar o binding do argumento livro para [FromForm].
+
+public async Task PostLivroAsync(LivroUpload livro)
+{
+        var content = CreateMultipartFormdata(livro);
+    var resposta = await httpClient.PostAsync($"livros", content);
+    resposta.EnsureSuccessStatusCode();
+}
+
+
+
+
+
+
+
+04 - Concluindo e removendo o acoplamento
+
+[00:00] Então gente, a gente concluiu agora a primeira parte aonde a gente está fazendo a aplicação Web consumir a API de Livros. Então eu quero só recapitular rapidinho o que a gente fez aqui.
+
+[00:17] Primeiro o diagrama, que é importante mostrar pra vocês. O que a gente fez? A gente chegou, agora a nossa aplicação Web ela está consumindo a API de Livros, fazendo requisições programaticamente dentro do C#. E agora nós queremos, inclusive, remover toda a parte de persistência e regras de negócio que nós temos amarradas lá na aplicação Web. Isso aqui a gente ainda não fez.
+
+[00:50] Vamos fazer isso agora. Vamos lá no Visual Studio e eu vou mostrar para vocês o seguinte. Aqui LivrosApiClient, vou tirar esse cara daqui. Então esse aqui é o controlador da nossa aplicação Web, veja que nós declaramos aqui no construtor do LivroController que dependemos de um repositório de Livro.
+
+[01:15] Mas gente, não dependemos mais. Olha só isso, vou tirar esse cara daqui e eu não tenho erro nenhum, porque eu não tenho mais dependência na parte de persistência, eu posso tirar esse cara daqui também. Inclusive eu vou tirar todo mundo que for desnecessário aqui. Deixa eu subir esse cara pra ficar aqui bonitinho.
+
+[01:44] Então o meu controlador não depende mais do repositório de Livros. Esse controlador, mas, também, o controlador HomeController. Olha só, eu também não dependo mais do repositório aqui, vou inclusive tirar esse cara.
+
+[02:06] Tirei esse cara aqui, também não tenho erro nenhum. Posso remover também essa namespace aqui. Vou remover os desnecessários. Então agora os meus controladores em aplicação Web não dependem mais do repositório de Livros. Muito bom. Deixa eu apagar esse cara aqui.
+
+[02:30] Então eu posso agora também remover, inclusive, a dependência que eu tenho com o DAL de Livros, com a camada de acesso aos dados de Livros, porque agora o acesso aos dados está sendo feito através da API. Então eu posso vir com o botão direito aqui, adicionar referência, e aqui eu posso chegar e posso dizer que eu não dependo mais do DAL de Livros. Boto aqui.
+
+[03:05] Eu imagino que agora eu vou tomar alguns erros porque, por exemplo, a classe de Startup ainda está amarrando o nosso contexto de leitura, mas eu não preciso mais dela. Então eu vou aqui e vou apagar esse cara, não preciso mais de você, muito obrigado por você ter me ajudado, mas agora não preciso mais. Então removi essa dependência.
+
+[03:30] O que mais? Eu também não preciso mais do repositório de Livros, também tirei esse cara aqui. Também aqui não tenho mais esse cara, também não tenho mais o modelo aqui, e também não preciso desse cara aqui. Olha que beleza, está ficando bom aqui o negócio.
+
+[03:51] Então, deixa eu ver, agora eu vou compilar a aplicação, vou compilar aqui a minha WebApp, e eu acho que eu vou tomar alguns erros porque algumas coisas ficaram da parte inicial do curso. Teve um erro aqui, uma falha aqui de erro. Onde está esse erro? Vamos exibir os erros. Cadê? Não apareceram. Ctrl+Shift+D. Ah, agora apareceu. Bom, então vamos lá. Está dando erro no ListasLeituraController. Onde esse cara está?
+
+[04:38] O que acontece gente é que, na nossa primeira parte do curso, a gente criou os controladores da API nesta pasta aqui. Então o que eu vou fazer agora é remover esses caras. ListasLeituraController vou excluir e vou excluir também o LivrosController. Eles estão sendo agora atendidos pelo projeto de API aqui. Então se eu compilar aqui novamente eu acho que agora nós estamos tranquilos.
+
+[05:13] Então removemos a dependência com a persistência de Livros. Vou rodar novamente pra ver se está tudo funcionando. Deu erro porque eu esqueci, é claro, de rodar as APIs aqui. Acho que só essa aqui precisa porque eu não estou fazendo autenticação por enquanto. Vou dar um refresh aqui, vamos ver se ele vai fazer lá.
+
+[05:48] Muito bem. Então olha: Detalhes, Listas de Leitura. Cangaceiro Javascript, posso colocar mais alguns valores aqui, gravar. Posso incluir mais um cara aqui com um título qualquer, gravar. Tá funcionando. Beleza.
+
+[06:08] Então gente terminamos a primeira parte onde a gente agora está consumindo a API de Livros. Só que a gente sabe que isso ainda não é o bastante, precisamos consumir essa API de Livros mas com a autenticação.
+
+[06:23] Então eu espero vocês na próxima aula onde a gente vai finalizar essa parte de transformar a nossa aplicação Web como um cliente, usando autenticação também. Um abraço.
+
+
+
+
+
+05 - Consolidando seus conhecimentos
+
+Chegou a hora de você seguir todos os passos realizados por mim durante esta aula:
+
+incluir os métodos assíncronos PostLivroAsync() e PutLivroAsync() para completar o CRUD de livros através da API
+substituir as actions correspondentes com chamadas para os métodos acima
+remover a dependência do repositório e do contexto EF Core para livros na classe Startup
+remover a dependência do projeto DALLivros
+Caso já tenha feito, ótimo! Se ainda não, é importante que você execute o que foi visto nos vídeos para poder continuar com a próxima aula.
+
+
+
+
+
+06 - Referências Utilizadas
+MultiparFormDataContent (referência)
+https://docs.microsoft.com/pt-br/dotnet/api/system.net.http.multipartformdatacontent
+
+
+
+
+07  O que aprendemos?
+Nessa aula você concluiu o consumo de nossa API, ainda sem autenticação. Para isso:
+aprendeu a enviar requisições para os verbos HTTP POST e PUT
+descobriu como enviar requisições cujo conteúdo do corpo era multipart/formdata
+fez upload de arquivos usando o aprendizado acima
+ DISCUTIR NO FORUM

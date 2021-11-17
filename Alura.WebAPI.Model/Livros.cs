@@ -15,6 +15,7 @@ namespace Alura.ListaLeitura.Modelos
         public TipoListaLeitura Lista { get; set; }
     }
 
+
     [XmlType("Livro")]
     public class LivroApi
     {
@@ -26,6 +27,7 @@ namespace Alura.ListaLeitura.Modelos
         public string Autor { get; set; }
         public string Lista { get; set; }
     }
+
 
     public class LivroUpload
     {

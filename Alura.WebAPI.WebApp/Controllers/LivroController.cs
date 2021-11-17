@@ -1,21 +1,18 @@
 ﻿using Alura.ListaLeitura.HttpClients;
 using Alura.ListaLeitura.Modelos;
-using Alura.ListaLeitura.Persistencia;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Alura.ListaLeitura.WebApp.Controllers
 {
-    //[Authorize]
+    [Authorize]
     public class LivroController : Controller
     {
-        private readonly IRepository<Livro> _repo;
         private readonly LivroApiClient _api;
-        public LivroController(IRepository<Livro> repository, LivroApiClient api)
+
+        public LivroController(LivroApiClient api)
         {
-            _repo = repository;
             _api = api;
         }
 
@@ -37,7 +34,6 @@ namespace Alura.ListaLeitura.WebApp.Controllers
             return View(model);
         }
 
-
         [HttpGet]
         public async Task<IActionResult> ImagemCapa(int id)
         {
@@ -49,10 +45,9 @@ namespace Alura.ListaLeitura.WebApp.Controllers
             return File("~/images/capas/capa-vazia.png", "image/png");
         }
 
-
         [HttpGet]
         public async Task<IActionResult> Detalhes(int id)
-        {            
+        {
             var model = await _api.GetLivroAsync(id);
             if (model == null)
             {
@@ -63,19 +58,11 @@ namespace Alura.ListaLeitura.WebApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Detalhes(LivroUpload model)
+        public async Task<IActionResult> Detalhes(LivroUpload model)
         {
             if (ModelState.IsValid)
             {
-                var livro = model.ToLivro();
-                if (model.Capa == null)
-                {
-                    livro.ImagemCapa = _repo.All
-                        .Where(l => l.Id == livro.Id)
-                        .Select(l => l.ImagemCapa)
-                        .FirstOrDefault();
-                }
-                _repo.Alterar(livro);
+                await _api.PutLivroAsync(model);
                 return RedirectToAction("Index", "Home");
             }
             return View(model);

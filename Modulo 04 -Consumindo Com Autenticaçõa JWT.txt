@@ -1,0 +1,128 @@
+01 - API com autenticação JWT
+
+Transcrição
+[00:00] Então, na aula passada a gente aprendeu a criar requisições http dentro do C# e usou, como exemplo pra fazer isso, o consumo da API de Livros. Nós fizemos que a aplicação Web consumisse a API de Livros.
+
+[00:24] Só que a gente aprendeu, adicionalmente a isso, a emitir qualquer requisição http. Pode não ser, necessariamente, pra uma API, mas pode ser pra alguma outra coisa que vocês têm necessidade. Você já sabe agora como emitir uma requisição http.
+
+[00:38] O problema é que a nossa API de Livros estava com segurança, ela era uma API autenticada. A gente inclusive tem uma API só pra poder fazer a autenticação dos usuários. E, na aula passada didaticamente, a gente comentou a parte de autorização da API pra que a gente não perdesse muito tempo com uma coisa só, fazendo as duas coisas ao mesmo tempo.
+
+[01:08] Então nesta aula agora a gente vai aprender a emitir requisições para APIs autenticadas e a primeira coisa que eu vou fazer é, aqui no Visual Studio, pegar a minha API e voltar ela para a autenticação, pra serem autorizadas.
+
+[01:34] Então agora, quando eu rodar novamente a minha API, e aqui meu Authentication Provider, quando eu chamar a minha WebApp eu espero que eu tome um erro de 401 porque eu não estou ainda passando o token de autenticação.
+
+[02:03] Como é que a gente fazia? Então vamos recapitular aqui, como é que é a gente fazia pra consumir a nossa API de Livros com autenticação?
+
+[02:12] Então vamos voltar aqui pro Postman, e o que eu tinha que fazer? Eu tinha que pegar um token. Então eu emitia uma requisição do tipo POST pra esse endpoint que tá escrito aqui /api/login, passando um JSON, login e password, emitia essa requisição e aí eu pegava a resposta que era um token de autenticação, no formato jwt (JSON Web Token), e colocava ele nas requisições da API de Livros como um cabeçalho.
+
+[02:52] Reparem aqui que eu tenho um cabeçalho, cujo valor é autorização, e o valor é prefixo Bearer e aí sim o token de autorização. Então era desse jeito que eu autenticava a minha API. Como fazer isso programaticamente? Como eu faço pra minha API Web começar a consumir a API autenticada? É o nosso objetivo para essa próxima aula.
+
+[03:30] E aí, como resultado disso, a gente vai conseguir remover, olha só que interessante, aqui no Startup a gente tem algumas dependências ainda. Olha só, eu tenho a dependência com o contexto de autenticação, tenho a dependência com Identity. E o meu objetivo ao final dessa aula é apagar isso aqui. Eu quero eliminar essa parte porque esse módulo de segurança agora está sendo assumido pela API de autenticação.
+
+[04:08] Então a minha API Web não vai mais fazer a parte de autenticação de usuário, de registro de usuário e tudo mais. Então bora pro próximo vídeo pra gente poder aprender a consumir APIs autenticadas.
+
+
+
+
+02 -O problema que vamos resolver
+Como enviar requisições que precisam ser autenticadas via JWT? E de maneira mais genérica, como enviar requisições que precisam passar informações no cabeçalho da solicitação?
+Quando aprendermos a responder essas questões, estaremos aptos a consumir outras APIs que também utilizam autenticação JWT. Além disso, estaremos preparados para customizar o cabeçalho de uma requisição HTTP qualquer.
+
+
+
+
+03 - Enviando o token no cabeçalho
+[00:00] Então eu vou abrir aqui no Visual Studio a classe que faz requisições pra minha API, LivroApiClient, e eu vou começar a trabalhar aqui nela pra passar o token de autenticação nas requisições. Então eu vou trabalhar primeiro com o método GetListaLeitura e GetCapaLivroAsync, porque são as requisições que são usadas pra montar a página inicial.
+
+[00:30] Vamos lá, olha só, no GetListaLeituraAsync o que eu preciso fazer é o que? Eu preciso, como a gente viu no Postman no vídeo anterior, a gente precisa passar o token via cabeçalho. E aqui o httpClient tem um método chamado DefaultRequestHeaders onde eu defino cabeçalhos que vão ser usados pra enviar a requisição, então cabeçalhos da requisição.
+
+[01:01] Que que eu posso fazer aqui? Eu posso adicionar aqui um cabeçalho e dizer que esse cabeçalho é o cabeçalho de autorização cujo valor é Bearer, mais o token que eu tinha pegado aqui do Postman. Vou botar esse cara aqui. E é dessa maneira que eu "seto" o meu cabeçalho antes de enviar a requisição.
+
+[01:37] Esse DefaultRequestHeaders ele também tem uma propriedade chamada Authorization que é onde eu justamente defino o cabeçalho de autorização. Percebam que é uma propriedade no singular porque eu só posso ter um elemento deste tipo de cabeçalho de autorização na requisição, se eu tiver dois ou mais eu vou tomar um erro, a especificação http.
+
+[02:14] Então eu posso, em vez de passar esse Add aqui, simplesmente definir um cara que é deste tipo aqui AuthenticationHeaderValue. Vou adicionar ele no meu System aqui e eu vou dizer que o esquema é Bearer e o valor é este token aqui. Então é uma maneira, acho que mais estruturada, de eu definir o cabeçalho de autorização. Vamos testar pra ver se vai funcionar?
+
+[02:53] Na verdade eu quero fazer o seguinte, eu quero pegar isso aqui e colocar também na capa porque, se tiver funcionando, a página inicial da minha aplicação vai funcionar. Então vamos lá. Ctrl+F5. Vamos ver se a página inicial vai funcionar.
+
+[03:12] Reparem que eu estava tomando erro de 401. Ah, ele está dando erro aqui porque ele não está conseguindo escrever na pasta lá. Então deixa eu fazer o seguinte, deixa eu sair aqui do IS, parar esse site daqui.
+
+[03:35] Esse erro é difícil, talvez vocês não tomem esse erro mas às vezes acontece porque ele, de alguma forma, achou algum conflito lá no arquivo e ele não consegue fazer o build e colocar a dll lá na pasta adequada.
+
+[04:00] Estou tomando um erro aqui porque eu acho que eu tirei o IS. Deixa eu ver agora. Beleza, estou tomando erro aqui, Unauthorized pra GetListaLeituraAsync. Deixa eu ver, Unauthorized. Será que o meu token está válido? Isso é uma coisa importante. Então eu vou mudar o token aqui.
+
+[04:37] Eu sei que vocês tão chiando aí do outro lado, eu estou ouvindo a reclamação de vocês, mas me acompanhem, confiem um pouco. A gente vai chegar lá. Bom, vamos ver.
+
+[04:54] Beleza, agora eu estou passando aqui. Cheguei na página inicial. Estou tomando algum erro aqui porque a requisição pra pegar a capa eu não atualizei o token, olha que coisa horrível que eu estou fazendo, estou escrevendo o token fixo aqui.
+
+[05:13] Mas eu quero só mostrar pra vocês como que a gente faz para emitir uma requisição autenticada, eu vou e defino o cabeçalho de autorização naquela propriedade DefaultRequestHeadersAuthorization. Então essa é a primeira parte.
+
+[05:34] Mas, é claro gente que isso tá está péssimo porque eu tô escrevendo o token fixo na mão, eu preciso pegar o token pra poder, justamente, colocar lá. Como é que eu pego o token? Eu faço uma nova requisição. Então agora a gente vai no Visual Studio criar também uma classe que consome a API de autorização.
+
+[05:59] Eu, aqui no meu httpClient, vou criar uma classe nova e vou chamar ela de AuthApiClient, e vou usar as mesmas convenções, as mesmas ideias, que eu usei pra fazer o LivroApiClient.
+
+[06:19] Primeiro eu vou criar um construtor, é bom pra gente fixar também, que vai receber um objeto do tipo httpClient, ele é chamado de Client. Esse cara aqui é do System.Net.Http. Vou guardar isso num campo somente leitura.
+
+[06:56] E agora eu vou criar aqui um método assíncrono que retorna um Task chamado PostLoginAsync, que vai ter o LoginModel como argumento de entrada. Esse LoginModel está definido na parte de segurança da gente, que representa aquele formulário que tem login e senha.
+
+[07:30] E vocês já sabem aqui, vou fazer uma requisição do tipo Post para a URL "login", passando o meu modelo como argumento de entrada. Percebam que esse modelo é um modelo simples, tem dois campos do tipo string, então eu não preciso criar um MultipartFormdataContent, posso deixar o próprio ASP.NET serializar pra mim esse modelo LoginModel num JSON.
+
+[08:07] Beleza, peguei a resposta aqui. O que setá acontecendo aqui? Não é possível... Ah tá, desculpa. Eu tenho que fazer aqui Post. Na verdade, não é esse método que eu tenho que usar, enganei vocês. Mentira, eu esqueci mesmo. PostAsync aqui na verdade é PostAsJsonAsync, e aí sim eu vou pedir pra ele serializar esse modelo num JSON. Por isso que estava dando aquele erro lá, porque ele estava esperando uma httpContent.
+
+[08:39] Agora eu vou fazer o seguinte, eu vou garantir que esse cara aqui... Calma, está faltando coisas aqui ainda. Eu vou garantir que eu tenho este cara e eu preciso retornar um token. Então é um cara aqui que retorna um token. Ótimo. Eu faço um return await resposta.Content.ReadAsStringAsync(). Pronto, peguei lá o meu token. Escrevi o código pra emitir uma requisição de Post pro login e vou retornar o token como uma string.
+
+[09:32] Vocês tão percebendo que eu estou injetando o httpClient aqui nesse construtor, então eu preciso aqui também amarrar isso. É novamente a mesmo ideia aqui, services.AddHttpClient do tipo AuthApiClient, ele não está achando porque eu esqueci de acertar o namespace deste cara, vamos lá.
+
+[10:00] Estou tentando fazer bem rápido pra gente não perder muito tempo. ListaLeitura.HttpClients. Vamos lá, aqui. Ok, client. Vou passar agora, adivinhem, o BaseAdress que é quase igual ao da minha API só que a porta é 5000. Beleza gente, é isso. Agora eu tenho já um cliente para consumir a API de autenticação.
+
+[10:36] Bom, então o que eu posso fazer? Aqui no meu GetListaLeitura eu posso criar esse cara var authApi = new, ou então eu posso pedir pra ele ser injetado diretamente aqui pra mim já que o próprio Startup tá fazendo isso. AuthApiClient.
+
+[11:11] E eu vou guardar esse cara aqui como um campo privado, somente leitura. E agora eu vou pegar aqui var token = _auth.PostLoginAsync, onde eu vou criar um LoginModel cujo login é admin e a senha, super secreta, 123.
+
+[12:09] Tudo bem gente? Não né, não está tudo bem. Beleza, eu estou indo passo-a-passo, devagarzinho, pra ver se a gente vai. Aqui tem que ser um await. Então aqui eu já peguei o cara, já passei aqui o meu cabeçalho. Vou fazer a mesma coisa no meu GetCapaLivros, acho que eu vou até copiar esse cara todo. Estou copiando e colando, também está estranho, mas vamos lá.
+
+[12:47] Bom, então já fiz uma pequena melhoria, ainda não está certo porque eu estou passando o valor de login e senha fixo no código, isso não está bom também. Mas agora eu já estou criando a requisição dentro da aplicação Web pra pegar o token. Vamos lá. Ctrl+F5. Beleza, agora eu estou consumindo a minha API autenticada e estou pegando um token através da API de autenticação.
+
+[13:30] Então já é dessa maneira que a gente tem que fazer. O que está faltando? Está faltando eu melhorar essa parte onde eu pego o login e a senha, isso aí não pode ficar fixo no código.
+
+[13:50] Imagine que existe um outro usuário que faça login aqui na minha Lista de Leitura, e eu estou usando sempre a mesma senha, a senha de um usuário, inclusive é administrativo pelo que está parecendo aí.
+
+[14:02] Então a gente vai ver o próximo vídeo como é que a gente faz agora pra extrair essa parte fixa que tá do login e da senha pra um local onde a gente integre isso na nossa aplicação Web.
+
+[14:20] Vejo vocês lá.
+
+
+
+
+
+
+04 - Content Negotiation na requisição
+Manuela deseja consumir um endpoint cuja URI é http://example.com/api/filmes/ através de um GET. Para isso escreveu o código abaixo:
+var httpClient = new HttpClient();
+httpClient.BaseAddress = "http://example.com/api/";
+var resposta = await httpClient.GetAsync($"filmes/139");
+resposta.EnsureSuccessStatusCode();
+var filme = await resposta.Content.ReadAsAsync<Filme>();COPIAR CÓDIGO
+Além disso, ela precisa consumir a lista de filmes em formato XML. Considerando que esse endpoint permite o retorno de recursos em XML, o que ela precisa adicionar no código para fazer a negociação de conteúdo com o servidor e obter XML ao invés de JSON por padrão?
+
+Selecione uma alternativa
+//código anterior...
+httpClient.DefaultRequestHeaders.Add("Accept", "application/xml");
+//código para envio da requisição...
+
+
+
+
+
+05 - Consolidando seus conhecimentos
+Chegou a hora de você seguir todos os passos realizados por mim durante esta aula:
+criar a classe AuthApiClient para consumir o serviço de autenticação e obter o token JWT
+modificar a action Usuario/Login para colocar o código de consumo lá
+guardar o token em um cookie de autenticação na mesma action
+modificar a classe LivroApiClient para injetar o token como cabeçalho de autenticação
+Caso já tenha feito, ótimo! Se ainda não, é importante que você execute o que foi visto nos vídeos para poder concluir o curso.
+
+
+06 - O que aprendemos?
+Nessa aula finalizamos uma parte da APIs Rest implementando o consumo de APIs com autenticação JWT. Para isso você:
+aprendeu a enviar cabeçalhos na requisição HTTP através da propriedade DefaultRequestHeaders
+usou JWT Token para autorização das requisições

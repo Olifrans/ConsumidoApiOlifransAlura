@@ -24,12 +24,14 @@ namespace Alura.ListaLeitura.Modelos
         }
     }
 
+
     public enum TipoListaLeitura
     {
         ParaLer,
         Lendo,
         Lidos
     }
+
 
     public class ListaLeitura
     {
