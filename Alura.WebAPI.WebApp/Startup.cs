@@ -1,6 +1,7 @@
 using Alura.ListaLeitura.HttpClients;
 using Alura.ListaLeitura.Seguranca;
 using Alura.WebAPI.WebApp.Formatters;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -32,13 +33,46 @@ namespace Alura.WebAPI.WebApp
                 options.UseSqlServer(Configuration.GetConnectionString("AuthDB"));
             });
 
-            services.AddIdentity<Usuario, IdentityRole>(options =>
-            {
-                options.Password.RequiredLength = 3;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequireLowercase = false;
-            }).AddEntityFrameworkStores<AuthDbContext>();
+
+            ////Autenticação esquema Identity
+            //services.AddIdentity<Usuario, IdentityRole>(options =>
+            //{
+            //    options.Password.RequiredLength = 3;
+            //    options.Password.RequireNonAlphanumeric = false;
+            //    options.Password.RequireUppercase = false;
+            //    options.Password.RequireLowercase = false;
+            //}).AddEntityFrameworkStores<AuthDbContext>();
+
+
+
+
+
+
+
+
+            //IHttpContextAccessor faz a adção do cabeçalho de autorização
+            services.AddHttpContextAccessor();
+
+
+            //Autenticação esquema Cookies
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options => {
+                    options.LoginPath = "/Usuario/Login";
+                });
+
+            //services.ConfigureApplicationCookie(options =>
+            //{
+            //    options.LoginPath = "/Usuario/Login";
+            //});
+
+
+
+
+
+
+
+
+
 
             //HttpClient
             services.AddHttpClient<LivroApiClient>(client =>
@@ -52,12 +86,7 @@ namespace Alura.WebAPI.WebApp
                 client.BaseAddress = new Uri("https://localhost:44389/api/");
                 //client.BaseAddress = new Uri("https://localhost:5000/api/");
             });
-
-
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.LoginPath = "/Usuario/Login";
-            });
+            
 
             services.AddMvc(options =>
             {
@@ -74,8 +103,7 @@ namespace Alura.WebAPI.WebApp
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseExceptionHandler("/Home/Error");                
                 app.UseHsts();
             }
             app.UseHttpsRedirection();

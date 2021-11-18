@@ -84,4 +84,116 @@ Transcrição
 
 
 
+02 - Idéia central do vídeo anterior
+Escolha a alternativa que melhor representa a idéia central do vídeo anterior.
 
+Selecione uma alternativa
+
+Como armazenar o token em um cookie de autenticação
+
+
+
+
+
+
+03 - HTTPContext fora do Framework
+[00:00] Então galera, a nossa aplicação está dando erro justamente porque a gente comentou a adição do cabeçalho de autorização, porque a gente não quer mais fazer isso via código, colocar fixo aqui login e senha. A gente foi e vinculou, no momento de login dessa aplicação Web, a criação de um token e o armazenamento desse token num cookie.
+
+[00:28] Então olha só, mas como é que eu pego esse token agora? Deixa eu abrir aqui um controlador, nesse controlador, dentro de uma action, eu tenho acesso ao contexto http daquela requisição.
+
+[00:44] Então eu consigo, por exemplo, acessar aqui a propriedade httpContext e aqui eu tenho uma propriedade chamada User. Essa propriedade User é, justamente, o usuário principal que está associado a essa requisição. Que foi o que a gente autenticou lá no nosso login. Então esse usuário principal também tem aquelas políticas que a gente adicionou, Claims.
+
+[01:18] Como é que eu faço pra pegar então aquele token que estava associado lá? Eu vou usar link, vou pegar o primeiro elemento que está associado a esta informação aqui. Eu tenho que primeiro adicionar o link no meu namespace e agora aqui é Type, em vez de ser Nome é Type, e o Type dele é Token, foi o que a gente colocou lá. E eu vou pegar aqui o valor deste token, vou guardar isso numa variável token.
+
+[02:04] Então eu vou pegar e vou colocar esse cara no Console pra gente ver se realmente esse token vai aparecer. Vou dar um Ctrl+F5 agora. Então pra pegar o token eu fui nas políticas do usuário principal e usei link pra isso.
+
+[02:29] Ctrl+F5 aqui. Vai dar aquele erro 401, é claro, mas eu quero saber se, lá na saída do meu servidor, eu vou conseguir achar lá o token. Aqui, que beleza. Então eu já tenho agora como pegar esse token em qualquer requisição, é só eu ter o HttpContext aqui.
+
+[02:58] Então minha gente, acabou. Vou dar um Ctrl+C aqui, vou pro meu livro LivroApiClient e, pra não ter que ficar repetindo esse código aqui, o que eu vou fazer é criar um método privado, private void AddBearerToken(), vou deixar esse código aqui por enquanto comentado.
+
+[03:31] E olha só gente, o código pra adicionar o cabeçalho de autorização é este aqui, só isso. Ctrl+U, pego o token, adiciono lá. E aqui, a cada método que eu vou fazer requisição, eu vou chamar esse método aqui.
+
+[04:03] Vamos lá, AddBearerToken(), o Delete também, esse cara aqui também. O que mais? Este cara. Esse aqui não, são privados. No post e no put. Mas eu estou com erro aqui, por quê? Porque esse contexto, HttpContext, não está disponível para essa classe.
+
+[04:40] Então gente, o problema todo é que o contexto de uma requisição só fica disponível dentro das classes do Framework ASP.NET Core. Essa classe não faz parte do Framework, e aí como que eu faço pra acessar o contexto http fora do Framework ASP.NET Core?
+
+[05:04] Então, esse é um problema comum e aí o ASP.NET Core criou uma maneira de fazer isso que é através de uma interface chamada IHttpContextAccessor, e eu vou guardar isso aqui como um campo também somente leitura.
+
+[05:37] Já não preciso mais da minha API. Peguei esse cara aqui. E agora? Vou pegar esse cara aqui. E olha só, agora eu consigo acessar o contexto a partir deste accessor, esse cara que permite o acesso ao contexto http.
+
+[06:25] Gente, vamos testar, será que vai funcionar? Esse cara aqui já é injetado automaticamente pelo ASP.NET Core, então eu não preciso amarrar na classe de Startup. Na verdade, eu acho que eu preciso sim, ele vai dar erro. Vamos dar um Ctrl+F5 aqui. Não foi possível resolver... Isso aí, realmente.
+
+[06:56] Na verdade o que acontece é o seguinte, isso foi uma issue... Lembrei, nos meus estudos pra essa parte desse curso, o ASP.NET Core ele injetava automaticamente um objeto para que implementasse essa interface mas, a partir de uma determinada versão do ASP.NET Core, ele deixou de fazer isso e você tem que fazer isso na mão, tem que ir lá no Startup e injetar.
+
+[07:22] Então vamos lá ver como a gente faz isso. Deixa eu botar aqui services.AddHttpContextAccessor, é um método que eu adiciono essa necessidade, injeto esse cara aí. Então eu vou dar um Ctrl+F5 novamente e olha só gente, que beleza. Olha só, estou muito surpreso com isso. Não achava que isso ia funcionar.
+
+[07:59] Mas então agora as minhas requisições para a API de Livros estão agora com seu cabeçalho definido com o token, e o token foi gerado através da página de login nesse cara aqui.
+
+[08:15] Então vamos pros exercícios, nós já conseguimos finalizar a parte de consumo de APIs. A gente aprendeu principalmente através da classe httpClient, mas a gente viu uma série de outras coisas a partir daí, a gente aprofundou bastante o nosso conhecimento na especificação http.
+
+[08:39] E agora a gente vai poder continuar evoluindo nossa API, a gente vai esquecer um pouquinho de lado a parte Web e a gente vai evoluir a API pra deixar ela cada vez mais padronizada.
+
+
+
+
+
+
+04 - Faça como eu fiz na aula
+Chegou a hora de você seguir todos os passos realizados por mim durante esta aula:
+
+mudar o esquema da autenticação para utilizar Cookies
+usar as classes HttpContext, ClaimsPrincipal, ClaimsIdentity, lista de Claims para definir a esquema
+receber como dependência um objeto que implementa a interface IHttpContextAccessor
+Caso já tenha feito, ótimo! Se ainda não, é importante que você execute o que foi visto nos vídeos para poder concluir o curso.
+
+
+
+
+
+
+
+
+05 - Referências Utilizadas
+Cookie Authentication
+https://docs.microsoft.com/en-us/aspnet/core/security/authentication/cookie
+
+Como utilizar IHttpContextAccessor
+https://www.strathweb.com/2016/12/accessing-httpcontext-outside-of-framework-components-in-asp-net-core/
+
+Anúncio da MS indicando que o objeto para acessar o contexto Http não será mais injetado por padrão
+https://github.com/aspnet/Hosting/issues/793
+
+
+
+
+06
+O que aprendemos?
+Nessa aula mudamos o esquema de autenticação de Identity para Cookies. Para isso você:
+usou a classe HttpContext e as classes Claims* para definir o novo esquema de autenticação
+usou a interface IHttpContextAccessor para ter acesso ao HttpContext fora das classes do framework
+
+
+
+
+
+
+
+07 - Conclusão
+Transcrição
+[00:00] Galera, agora a nossa aplicação Web está desacoplada, ela não tem ideia nenhuma de como que esses livros estão sendo persistidos, também não tem ideia de qual é o mecanismo de autenticação que está sendo feito pra logar os usuários. Isso é muito legal, isso permite que cada aplicação APIs, a WebApi, evoluam separadamente, possam ter mais escalabilidade, manutenibilidade, e tudo mais.
+
+[00:31] Então aquela meta que nós tínhamos, no começo da primeira aula, a gente atingiu. A gente acabou com essa responsabilidade aqui na aplicação Web, persistência, regras de negócio, segurança, e passou a consumir a API de Livros e a API de Autenticação pra gerar o token de autenticação. Então esse cara aqui, a aplicação Web, não depende mais da persistência e não depende mais também do mecanismo de segurança.
+
+[01:06] Então eu quero só finalizar agora a aula justamente mostrar pra vocês que realmente eu não preciso mais desses caras. O Identity aqui já está descomentado aqui, já está desabilitado, porque nós não estamos mais utilizando.
+
+[01:23] Outra coisa que nós não estamos fazendo também mais é esse contexto de autenticação aqui também, que vai no EntityFramework, também não estou mais usando. Então eu posso remover esses caras aqui. Percebam como meu código está ficando mais simples. Olha isso, que beleza.
+
+[01:47] Então agora eu posso chegar aqui também e remover as dependências que são desnecessárias aqui. Outra coisa que eu posso fazer também é remover a dependência com a camada de acesso aos dados de usuários, também não preciso mais desse cara. E aqui esse controlador, também de login, posso apagar porque não precisa mais, a API não está mais sendo servida através deste projeto. Que legal gente.
+
+[02:22] Vou dar uma compilada aqui geral. Não, vou compilar só esse cara aqui e vejo se tá tudo certo, se tem algum problema. Compilou, não tem falha.
+
+[02:33] E, pra finalizar mesmo, eu vou aqui no appsettings e eu não preciso mais dessas informações de ConnectionStrings porque eu não estou mais fazendo acesso ao banco de dados através da minha aplicação Web. Quanto menos informação, quanto menos vínculos eu tiver melhor para minha aplicação.
+
+[02:58] Então novamente vou compilar, vou rodar a aplicação Web. Aqui estão os meus livros, consigo fazer os detalhes, consigo fazer mudanças. Editado, gravar. Está lá o editado, beleza. Consigo excluir.
+
+[03:28] Então agora nossa aplicação Web está independente da persistência e da segurança, mas a gente aprendeu uma porção de coisas pra quando a gente for clientes de outras APIs a gente vai saber o que fazer. Autenticação, httpClient, cabeçalho e tudo mais.

@@ -4,6 +4,7 @@ using Alura.ListaLeitura.WebApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Alura.ListaLeitura.WebApp.Controllers
@@ -26,6 +27,10 @@ namespace Alura.ListaLeitura.WebApp.Controllers
 
         public async Task<IActionResult> Index()
         {
+            //Autenticação via token
+            var token = HttpContext.User.Claims.First(c => c.Type == "Token").Value;
+            System.Console.WriteLine($"TOKEN: {token}");
+
             var model = new HomeViewModel
             {
                 ParaLer = await ListaDoTipo(TipoListaLeitura.ParaLer),
