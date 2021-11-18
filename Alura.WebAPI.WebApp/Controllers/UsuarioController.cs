@@ -4,7 +4,6 @@ using Alura.ListaLeitura.WebApp.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -16,6 +15,7 @@ namespace Alura.ListaLeitura.WebApp.Controllers
     public class UsuarioController : Controller
     {
         private readonly AuthApiClient _authApiClient;
+
         public UsuarioController(AuthApiClient authApiClient)
         {
             this._authApiClient = authApiClient;
@@ -25,30 +25,46 @@ namespace Alura.ListaLeitura.WebApp.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login()
         {
-            await HttpContext.SignOutAsync();
             return View();
         }
 
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginModel model) //Esqueme de autenticação de cookiees
+        public async Task<IActionResult> Login(LoginModel model) //Esquema de autenticação de cookiees
         {
             if (ModelState.IsValid)
             {
                 var result = await _authApiClient.PostLoginAsync(model);
-                //var result = await _signInManager.PasswordSignInAsync(model.Login, model.Password, false, false); //Autenticação Identity
                 if (result.Succeeded)
                 {
-                    //Lista de politicas
-                    List<Claim> claims = new List<Claim>
+                    //primeiro vamos criar os direitos/reinvindicações/claims
+                    var claims = new List<Claim>
                     {
                         new Claim(ClaimTypes.Name, model.Login),
-                        new Claim("Token", result.Token)
+                        new Claim("Token", result.Token) //em uma claim eu guardo o token!
                     };
-                    ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+
+                    //e guardar esses direitos na identidade principal
+                    var claimsIdentity = new ClaimsIdentity(
+                        claims,
+                        CookieAuthenticationDefaults.AuthenticationScheme
+                    );
+
+                    var authProp = new AuthenticationProperties
+                    {
+                        IssuedUtc = DateTime.UtcNow,
+                        //configurar expiração do cookie para um valor menor que a expiração do token
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(25),
+                        IsPersistent = true
+                    };
+
+                    //e finalmente autenticar via cookie com essa identidade
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(claimsIdentity),
+                        authProp);
+
                     return RedirectToAction("Index", "Home");
                 }
                 ModelState.AddModelError(String.Empty, "Erro na autenticação");
@@ -64,9 +80,6 @@ namespace Alura.ListaLeitura.WebApp.Controllers
             return View();
         }
 
-
-
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AllowAnonymous]
@@ -74,13 +87,8 @@ namespace Alura.ListaLeitura.WebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new Usuario { UserName = model.Login };
-                //var result = await _userManager.CreateAsync(user, model.Password);
-               // if (result.Succeeded)
-                {
-                    //await _signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("Index", "Home");
-                }
+                await _authApiClient.PostRegisterAsync(model);
+                return RedirectToAction("Index", "Home");
             }
             return View(model);
         }
@@ -88,7 +96,7 @@ namespace Alura.ListaLeitura.WebApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            //await _signInManager.SignOutAsync();
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login");
         }
     }

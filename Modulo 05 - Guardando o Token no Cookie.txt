@@ -197,3 +197,16 @@ Transcrição
 [02:58] Então novamente vou compilar, vou rodar a aplicação Web. Aqui estão os meus livros, consigo fazer os detalhes, consigo fazer mudanças. Editado, gravar. Está lá o editado, beleza. Consigo excluir.
 
 [03:28] Então agora nossa aplicação Web está independente da persistência e da segurança, mas a gente aprendeu uma porção de coisas pra quando a gente for clientes de outras APIs a gente vai saber o que fazer. Autenticação, httpClient, cabeçalho e tudo mais.
+
+
+
+08 - Projeto final do curso
+Baixe o código-fonte final do projeto!
+https://caelum-online-public.s3.amazonaws.com/1018-asp-net-core-web-api-rest/05/Alura.WebAPI.Aula5.Final.zip
+
+
+
+Isso aí, mais uma aula finalizada!
+Parabéns! Continue assim que você vai longe :)
+
+TERMINAR CURSO
